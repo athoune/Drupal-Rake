@@ -4,4 +4,13 @@ namespace :drupal do
 			@fetcher.fetch "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
 		end
 	end
+	namespace :drush do
+		file 'bin/drush' do
+			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-Versions-2.0.tar.gz"
+			sh "mkdir -p bin"
+			Dir.chdir 'bin' do
+				sh "tar -xvzf #{drush}"
+			end
+		end
+	end
 end
