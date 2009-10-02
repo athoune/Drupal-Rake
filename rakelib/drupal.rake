@@ -1,3 +1,7 @@
+require 'rakelib/drupal'
+
+@drupal ||= Drupal.new @profile['drupal']['path']
+
 namespace :drupal do
 	namespace :core do
 		task :fetch do
