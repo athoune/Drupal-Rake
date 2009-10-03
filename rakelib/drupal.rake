@@ -16,5 +16,6 @@ namespace :drupal do
 				sh "tar -xvzf #{drush}"
 			end
 		end
+		task :fetch => 'bin/drush'
 	end
 end

@@ -1,9 +1,11 @@
 require 'rakelib/fetch'
 
-@fetch ||= Fetch::Fetcher.new @profile['fetcher']['path']
+@fetcher ||= Fetch::Fetcher.new @profile['fetcher']['path']
 
 namespace :fetch do
 	task :clean do
-		sh "rm -r #{@fetcher.uri.path}"
+		if File.exist? @fetcher.uri.path
+			sh "rm -r #{@fetcher.uri.path}"
+		end
 	end
 end

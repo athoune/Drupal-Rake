@@ -3,9 +3,10 @@ require 'uri'
 module Fetch
 
 	class Fetcher
-		def initialize(url = 'local:///tmp/fetcher/')
+		attr :uri
+		def initialize(url = 'file:///tmp/fetcher/')
 			@uri = URI.parse(url)
-			if @uri.scheme == 'local'
+			if @uri.scheme == 'file'
 				@cache = CacheLocal.new(@uri)
 			end
 		end
