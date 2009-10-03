@@ -7,14 +7,12 @@ class Db
 			when 'macport': '/opt/local/bin'
 			else            '/usr/bin'
 		end
-		info = @uri.userinfo.split(':')
-		@login = info[0]
-		@password = info[1]
+		@login, @password = @uri.userinfo.split(':')
+		@dbname = @uri.path[1,@uri.path.length]
 	end
 	def dump(name)
 		sh "mkdir -p dump"
-		p @uri.userinfo
-		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --password='#{@password}' --quick --add-drop-database #{@uri.path[1,@uri.path.length]} | bzip2 -c > dump/#{name}.sql.bz2"
+		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --password='#{@password}' --quick --add-drop-database #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
 	end
 	def load(name)
 		
