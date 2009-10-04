@@ -21,8 +21,14 @@ The fetcher is a tool wich download and cache distant data. For now, the fetcher
 
 Drupal
 ------
+
 	drupal:
 	  version: 6.14
 	  path:    '/Applications/MAMP/htdocs/drupal_test/'
 	  db:      'mysqli://druser:drupassword@localhost:8889/drupaldb_test'
 
+Dump
+----
+The name of the dump
+
+	dump: 'dump'
