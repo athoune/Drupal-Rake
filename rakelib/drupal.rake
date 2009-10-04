@@ -20,6 +20,7 @@ namespace :drupal do
 			Dir.chdir '/tmp' do
 				sh "tar -xvzf #{tarball}"
 				sh "mv /tmp/drupal-#{@profile['drupal']['version']}/* #{noTrailingSpace(@profile['drupal']['path'])}"
+				sh "mv /tmp/drupal-#{@profile['drupal']['version']}/.htaccess #{noTrailingSpace(@profile['drupal']['path'])}"
 			end
 			sh "rm -r /tmp/drupal-#{@profile['drupal']['version']}"
 			sh "rm -r #{@profile['drupal']['path']}sites/*"
@@ -54,6 +55,7 @@ namespace :drupal do
 			Rake::Task["drupal:core:patch"].invoke
 			sh "mv #{backup}* #{@profile['drupal']['path']}sites/"
 			sh "rm -r #{backup}"
+			@drupal.drush 'updatedb'
 		end
 		
 		task :conf => @profile['drupal']['path'] do
@@ -69,6 +71,7 @@ namespace :drupal do
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"
 			end
+			sh "chmod +x bin/drush/drush"
 		end
 		
 		task :install => 'bin/drush'
@@ -83,6 +86,7 @@ namespace :drupal do
 		dump = @profile.fetch('dump', 'dump')
 		desc "Make a db snapshot"
 		task :dump do
+			@drupal.drush 'cache clear'
 			@db.dump dump
 		end
 		
@@ -96,6 +100,7 @@ namespace :drupal do
 		desc "Load the last local snapshot"
 		task :load do
 			@db.load dump
+			@drupal.drush '-y updatedb'
 		end
 	end
 	

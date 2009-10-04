@@ -8,7 +8,7 @@ class Drupal
 		end
 	end
 	def drush(command)
-		drush = `pwd` + '/bin/drush/drush'
+		drush = `pwd`.strip + '/bin/drush/drush'
 		Dir.chdir @path do
 			sh "#{drush} #{command}"
 		end
