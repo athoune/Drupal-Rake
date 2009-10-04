@@ -35,8 +35,12 @@ namespace :drupal do
 		end
 		
 		task :sites => @profile['drupal']['path'] do
+			sh "mkdir -p devel"
 			@profile['drupal']['sites'].each do |key, url|
 				Subversion.get url, "#{@profile['drupal']['path']}sites/#{key}"
+				if not File.exist? "devel/#{key}"
+					sh "ln -s #{@profile['drupal']['path']}sites/#{key} devel/#{key}"
+				end
 			end
 		end
 		
