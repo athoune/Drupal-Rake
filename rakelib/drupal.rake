@@ -97,4 +97,7 @@ namespace :drupal do
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
+	
+	desc "Upgrade drupal core without breaking customize"
+	task :upgrade => 'core:upgrade'
 end
