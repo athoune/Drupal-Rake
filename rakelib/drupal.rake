@@ -77,15 +77,21 @@ namespace :drupal do
 	
 	namespace :db do
 		dump = @profile.fetch('dump', 'dump')
+		desc "Make a db snapshot"
 		task :dump do
 			@db.dump dump
 		end
 		
-		task :upgrade do
+		task :_upgrade do
 			Subversion.update "dump/#{dump}.sql.bz2"
 		end
 		
-		task :install do
+		desc "Load the last versionned snapshot"
+		task :upgrade => [:_upgrade, :load]
+		
+		desc "Load the last local snapshot"
+		task :load do
+			Subversion.load dump
 		end
 	end
 	
@@ -94,6 +100,9 @@ namespace :drupal do
 
 	desc "Install Drupal"
 	task :install => ['core:install', 'drush:install']
+	
+	desc "Get the newest Drupal with the newest snapshot"
+	task :lastOne => [:clean, :install, 'db:upgrade']
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
