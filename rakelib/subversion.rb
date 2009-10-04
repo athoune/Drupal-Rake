@@ -54,7 +54,19 @@ module Subversion
 
 	def Subversion.update(target)
 		puts "[SVN] Update de #{target}"
-		`cd #{target} && svn update`
+		if File.file? target
+			`svn update #{target}`
+		else
+			`cd #{target} && svn update`
+		end
+	end
+
+	def Subversion.get(url, target)
+		if File.exist? target
+			Subversion.update target
+		else
+			Subversion.checkout url, target
+		end
 	end
 
 	def Subversion.info(url)
