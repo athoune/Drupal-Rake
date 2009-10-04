@@ -91,7 +91,7 @@ namespace :drupal do
 		
 		desc "Load the last local snapshot"
 		task :load do
-			Subversion.load dump
+			@db.load dump
 		end
 	end
 	
