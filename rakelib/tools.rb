@@ -5,3 +5,10 @@ def noTrailingSpace(path)
 		path
 	end
 end
+
+def generate(template, destination, binding=binding)
+	p "[Generate] #{template} -> #{destination}"
+	template = File.read(template)
+	res = ERB.new(template).result(binding)
+	File.open(destination, 'w') {|f| f.write(res) }
+end

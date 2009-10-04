@@ -38,14 +38,18 @@ namespace :drupal do
 			end
 		end
 		
-		desc "Install Drupal project"
-		task :install => [:patch, :sites] do
-		end
+		task :install => [:patch, :sites, :conf]
 		
 		task :upgrade do
 			
 		end
+		
+		task :conf => @profile['drupal']['path'] do
+			sh "mkdir -p #{@profile['drupal']['path']}sites/default"
+			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
+		end
 	end
+	
 	namespace :drush do
 		file 'bin/drush' do
 			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-Versions-2.0.tar.gz"
@@ -54,7 +58,7 @@ namespace :drupal do
 				sh "tar -xvzf #{drush}"
 			end
 		end
-		desc "Install drush"
+		
 		task :install => 'bin/drush'
 		task :clean do
 			if File.exist? 'bin/drush'
@@ -62,14 +66,23 @@ namespace :drupal do
 			end
 		end
 	end
+	
 	namespace :db do
 		task :dump do
 			@db.dump @profile.fetch('dump', 'dump')
 		end
+		
 		task :upgrade do
 			Subversion.update "dump/#{@profile.fetch('dump', 'dump')}.sql.bz2"
 		end
 	end
+	
+	desc "Build Drupal's settings"
+	task :conf => 'core:conf'
+
+	desc "Install Drupal"
 	task :install => ['core:install', 'drush:install']
+
+	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
 end
