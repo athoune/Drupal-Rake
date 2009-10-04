@@ -26,7 +26,9 @@ namespace :drupal do
 		end
 		
 		task :clean do
-			rm_r @profile['drupal']['path']
+			if File.directory? @profile['drupal']['path']
+				rm_r @profile['drupal']['path']
+			end
 		end
 		
 		task :patch => @profile['drupal']['path'] do
@@ -41,7 +43,13 @@ namespace :drupal do
 		task :install => [:patch, :sites, :conf]
 		
 		task :upgrade do
-			
+			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
+			sh "mkdir -p #{backup}"
+			sh "cp -r #{@profile['drupal']['path']}sites/* #{backup}"
+			rm_r @profile['drupal']['path']
+			Rake::Task["drupal:core:patch"].invoke
+			sh "mv #{backup}* #{@profile['drupal']['path']}sites/"
+			sh "rm -r #{backup}"
 		end
 		
 		task :conf => @profile['drupal']['path'] do
@@ -68,12 +76,16 @@ namespace :drupal do
 	end
 	
 	namespace :db do
+		dump = @profile.fetch('dump', 'dump')
 		task :dump do
-			@db.dump @profile.fetch('dump', 'dump')
+			@db.dump dump
 		end
 		
 		task :upgrade do
-			Subversion.update "dump/#{@profile.fetch('dump', 'dump')}.sql.bz2"
+			Subversion.update "dump/#{dump}.sql.bz2"
+		end
+		
+		task :install do
 		end
 	end
 	
