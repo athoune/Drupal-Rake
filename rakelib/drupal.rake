@@ -1,5 +1,7 @@
 require 'rakelib/drupal'
 require 'rakelib/db'
+require 'rakelib/tools'
+require 'rakelib/subversion'
 
 @drupal ||= Drupal.new @profile['drupal']['path']
 if `uname`.strip == 'Linux'
@@ -11,10 +13,28 @@ end
 
 namespace :drupal do
 	namespace :core do
-		task :fetch do
-			@fetcher.fetch "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
+		file @profile['drupal']['path'] do
+			tarball = @fetcher.fetch "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
+			sh "mkdir -p #{@profile['drupal']['path']}"
+			Dir.chdir '/tmp' do
+				sh "tar -xvzf #{tarball}"
+				sh "mv /tmp/drupal-#{@profile['drupal']['version']}/* #{noTrailingSpace(@profile['drupal']['path'])}"
+			end
+			sh "rm -r /tmp/drupal-#{@profile['drupal']['version']}"
+			sh "rm -r #{@profile['drupal']['path']}sites/*"
+		end
+		task :clean do
+			rm_r @profile['drupal']['path']
 		end
 		task :patch do
+		end
+		task :sites => @profile['drupal']['path'] do
+			@profile['drupal']['sites'].each do |key, url|
+				Subversion.checkout url, "#{@profile['drupal']['path']}sites/#{key}"
+			end
+		end
+		desc "Install Drupal project"
+		task :install => [ :oob] do
 		end
 	end
 	namespace :drush do
