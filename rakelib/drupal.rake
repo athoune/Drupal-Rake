@@ -33,6 +33,7 @@ namespace :drupal do
 		end
 		
 		task :patch => @profile['drupal']['path'] do
+			#[TODO] iterate over patch/*.patch and do it
 		end
 		
 		task :sites => @profile['drupal']['path'] do
@@ -103,6 +104,16 @@ namespace :drupal do
 			@drupal.drush '-y updatedb'
 		end
 	end
+	
+	desc "Launch cron task"
+	task :cron do
+		@drupal.cron
+	end
+
+	desc "Clear cache"
+	task :clear do
+		@drupal.clear_cache
+	end	
 	
 	desc "Build Drupal's settings"
 	task :conf => 'core:conf'

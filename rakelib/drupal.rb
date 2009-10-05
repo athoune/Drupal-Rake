@@ -13,4 +13,10 @@ class Drupal
 			sh "#{drush} #{command}"
 		end
 	end
+	def cron
+		self.drush 'cron'
+	end
+	def clear_cache
+		self.drush 'clear cache'
+	end
 end
