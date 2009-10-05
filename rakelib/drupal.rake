@@ -15,7 +15,11 @@ namespace :drupal do
 	namespace :core do
 		
 		file @profile['drupal']['path'] do
-			tarball = @fetcher.fetch "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
+			url = case @profile['drupal'].fetch('flavor', 'vanilla')
+				when 'pressflow' : "http://launchpad.net/pressflow/6.x/#{@profile['drupal']['version']}/+download/pressflow-#{@profile['drupal']['version']}.tar.gz"
+				else "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
+				end
+			tarball = @fetcher.fetch url
 			sh "mkdir -p #{@profile['drupal']['path']}"
 			Dir.chdir '/tmp' do
 				sh "tar -xvzf #{tarball}"
