@@ -26,4 +26,8 @@ class Drupal
 	def clear_cache
 		self.drush 'clear cache'
 	end
+
+	def test
+		self.drush 'test'
+	end
 end
