@@ -17,7 +17,7 @@ namespace :drupal do
 		file @profile['drupal']['path'] do
 			url = case @profile['drupal'].fetch('flavor', 'vanilla')
 				when 'pressflow' : "http://launchpad.net/pressflow/6.x/#{@profile['drupal']['version']}/+download/pressflow-#{@profile['drupal']['version']}.tar.gz"
-				when 'acquia':     "http://acquia.com/files/downloads/acquia-drupal-#{@profile['drupal']['version']}.tar.gz"
+				when 'acquia' :    "http://acquia.com/files/downloads/acquia-drupal-#{@profile['drupal']['version']}.tar.gz"
 				else               "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
 				end
 			tarball = @fetcher.fetch url
@@ -46,7 +46,7 @@ namespace :drupal do
 			@profile['drupal']['sites'].each do |key, url|
 				Subversion.get url, "#{@profile['drupal']['path']}sites/#{key}"
 				if not File.exist? "devel/#{key}"
-					sh "ln -s #{@profile['drupal']['path']}sites/#{key} devel/#{key}"
+					sh "ln -s #{@profile['drupal']['path']}sites/#{key} devel/#{key.replace('/', '_')}"
 				end
 			end
 		end
