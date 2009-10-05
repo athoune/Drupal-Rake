@@ -89,6 +89,7 @@ namespace :drupal do
 	
 	namespace :db do
 		dump = @profile.fetch('dump', 'dump')
+
 		desc "Make a db snapshot"
 		task :dump do
 			@drupal.drush 'cache clear'
@@ -106,6 +107,11 @@ namespace :drupal do
 		task :load do
 			@db.load dump
 			@drupal.drush '-y updatedb'
+		end
+		
+		desc "Create user and its rights"
+		task :init do
+			@db.create_user 
 		end
 	end
 	

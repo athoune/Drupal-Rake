@@ -20,4 +20,8 @@ class Db
 	def load(name)
 		sh "bzcat dump/#{name}.sql.bz2 | #{@bin}mysql -h #{@uri.host} -u #{@login} --password='#{@password}' #{@dbname}"
 	end
+	
+	def create_user
+		sh %{ echo "CREATE DATABASE IF NOT EXISTS #{@dbname}; INSERT INTO user VALUES('localhost','#{@login}',PASSWORD('#{@password}'), 'Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'); GRANT ALL PRIVILEGES ON #{@dbname}.* TO '#{@login}'@'localhost'; FLUSH PRIVILEGES;" | #{@bin}mysql -u root -h #{@uri.host} mysql -p }
+	end
 end
