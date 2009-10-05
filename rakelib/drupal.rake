@@ -17,7 +17,8 @@ namespace :drupal do
 		file @profile['drupal']['path'] do
 			url = case @profile['drupal'].fetch('flavor', 'vanilla')
 				when 'pressflow' : "http://launchpad.net/pressflow/6.x/#{@profile['drupal']['version']}/+download/pressflow-#{@profile['drupal']['version']}.tar.gz"
-				else "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
+				when 'acquia':     "http://acquia.com/files/downloads/acquia-drupal-#{@profile['drupal']['version']}.tar.gz"
+				else               "http://ftp.drupal.org/files/projects/drupal-#{@profile['drupal']['version']}.tar.gz"
 				end
 			tarball = @fetcher.fetch url
 			sh "mkdir -p #{@profile['drupal']['path']}"
