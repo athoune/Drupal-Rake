@@ -1,6 +1,6 @@
 require 'rakelib/fetch'
 
-@fetcher ||= Fetch::Fetcher.new @profile['fetcher']['path']
+@fetcher ||= Fetch::Fetcher.new((@profile.key? 'fetcher') ? @profile['fetcher']['path'] : 'file:///tmp/fetcher/')
 
 namespace :fetch do
 	desc "Cleanup download cache"
