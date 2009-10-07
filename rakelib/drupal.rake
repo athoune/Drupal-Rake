@@ -66,6 +66,10 @@ namespace :drupal do
 		
 		task :conf => @profile['drupal']['path'] do
 			sh "mkdir -p #{@profile['drupal']['path']}sites/default"
+			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
+			if File.exist?(settings) and not File.writable?(settings)
+				sh "sudo chmod +w #{settings}"
+			end
 			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
 		end
 	end
