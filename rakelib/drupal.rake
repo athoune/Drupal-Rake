@@ -109,7 +109,9 @@ namespace :drupal do
 		task :upgrade => [:_upgrade, :load]
 		
 		desc "Load the last local snapshot"
-		task :load do
+		task :load => [:_load, "^enable"]
+		
+		task :_load do
 			@db.load dump
 			@drupal.drush '-y updatedb'
 		end
@@ -117,6 +119,12 @@ namespace :drupal do
 		desc "Create user and its rights"
 		task :init do
 			@db.create_user 
+		end
+	end
+	
+	task :enable do
+		@profile['drupal'].fetch('modules',[]).each do |m|
+			@drupal.enable m
 		end
 	end
 	

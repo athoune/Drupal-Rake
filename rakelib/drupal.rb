@@ -34,4 +34,8 @@ class Drupal
 	def test
 		self.drush 'test'
 	end
+	
+	def enable(m)
+		self.drush "--yes enable #{m}"
+	end
 end
