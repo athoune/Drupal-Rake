@@ -1,4 +1,5 @@
 require 'yaml'
+require 'deep_merge'
 
 module Profile
 
@@ -19,7 +20,7 @@ module Profile
 		if profile == nil
 			profile = (YAML::load(IO.read(cnf)))
 		else
-			profile = profile.merge(YAML::load(IO.read(cnf)))
+			profile = profile.deep_merge!(YAML::load(IO.read(cnf)))
 		end
 	end
 
