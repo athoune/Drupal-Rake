@@ -3,8 +3,12 @@ class Drupal
 
 	def initialize(path)
 		@path = path
-		Dir.chdir @path do
-			@version = IO.read('modules/system/system.module').scan(/define\('VERSION', '(.*)'\);/)[0][0]
+		if File.exist? path
+			Dir.chdir @path do
+				@version = IO.read('modules/system/system.module').scan(/define\('VERSION', '(.*)'\);/)[0][0]
+			end
+		else
+			@version = nil
 		end
 	end
 
