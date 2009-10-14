@@ -13,6 +13,11 @@ end
 
 namespace :drupal do
 	namespace :core do
+		file "#{@profile['drupal']['path']}sites/default/files" => @profile['drupal']['path'] do
+			# [TODO] use real Drupal default/files
+			# [TODO] rights
+			sh "sudo mkdir -p #{@profile['drupal']['path']}sites/default/files && sudo chmod 777 #{@profile['drupal']['path']}sites/default/files" 
+		end
 		
 		file @profile['drupal']['path'] do
 			url = case @profile['drupal'].fetch('flavor', 'vanilla')
@@ -46,12 +51,12 @@ namespace :drupal do
 			@profile['drupal']['sites'].each do |key, url|
 				Subversion.get url, "#{@profile['drupal']['path']}sites/#{key}"
 				if not File.exist? "devel/#{key}"
-					sh "ln -s #{@profile['drupal']['path']}sites/#{key} devel/#{key.replace('/', '_')}"
+					sh "ln -s #{@profile['drupal']['path']}sites/#{key} devel/#{key.gsub(/\//, '_')}"
 				end
 			end
 		end
 		
-		task :install => [:patch, :sites, :conf]
+		task :install => [:patch, :sites, :conf, "#{@profile['drupal']['path']}sites/default/files"]
 		
 		task :upgrade do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
@@ -116,10 +121,12 @@ namespace :drupal do
 			@drupal.drush '-y updatedb'
 		end
 		
-		desc "Create user and its rights"
-		task :init do
+		task :user do
 			@db.create_user 
 		end
+		
+		desc "database setup and first import"
+		task :install => [:user, :upgrade]
 	end
 	
 	task :enable do
