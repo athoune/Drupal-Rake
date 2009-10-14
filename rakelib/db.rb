@@ -13,8 +13,9 @@ class Db
 	end
 	
 	def dump(name)
+		#[TODO] don't backup session and cache :  session cache watchdog
 		sh "mkdir -p dump"
-		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --password='#{@password}' --quick --add-drop-database #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
+		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --compact --ignore-table=#{@dbname}.session --ignore-table=#{@dbname}.watchdog --ignore-table=#{@dbname}.cache --password='#{@password}' --quick --add-drop-database #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
 	end
 	
 	def load(name)
@@ -22,6 +23,6 @@ class Db
 	end
 	
 	def create_user
-		sh %{ echo "CREATE DATABASE IF NOT EXISTS #{@dbname}; INSERT INTO user VALUES('localhost','#{@login}',PASSWORD('#{@password}'), 'Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'); GRANT ALL PRIVILEGES ON #{@dbname}.* TO '#{@login}'@'localhost'; FLUSH PRIVILEGES;" | #{@bin}mysql -u root -h #{@uri.host} mysql -p }
+		sh %{ #{@bin}mysql -u root -h #{@uri.host} -p --batch --execute "CREATE DATABASE IF NOT EXISTS #{@dbname}; REPLACE INTO mysql.user (Host, User, Password, Select_priv, Insert_priv, Update_priv, Delete_priv, Create_priv, Drop_priv, Reload_priv, References_priv, Index_priv, Alter_priv) VALUES('localhost','#{@login}',PASSWORD('#{@password}'), 'Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'); FLUSH PRIVILEGES; GRANT ALL PRIVILEGES ON #{@dbname}.* TO '#{@login}'@'localhost'; FLUSH PRIVILEGES;" }
 	end
 end
