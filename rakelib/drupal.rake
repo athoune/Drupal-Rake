@@ -1,9 +1,10 @@
 require 'rakelib/drupal'
 require 'rakelib/db'
+require 'rakelib/php'
 require 'rakelib/tools'
 require 'rakelib/subversion'
 
-@drupal ||= Drupal.new @profile['drupal']['path']
+@drupal ||= Drupal.new @profile['server'], @profile['drupal']['path']
 if `uname`.strip == 'Linux'
 	server = 'linux'
 else
@@ -58,7 +59,7 @@ namespace :drupal do
 		
 		task :install => [:patch, :sites, :conf, "#{@profile['drupal']['path']}sites/default/files"]
 		
-		task :upgrade do
+		task :upgradeCore do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
 			sh "mkdir -p #{backup}"
 			sh "cp -r #{@profile['drupal']['path']}sites/* #{backup}"
@@ -69,6 +70,7 @@ namespace :drupal do
 			@drupal.drush 'updatedb'
 		end
 		
+		
 		task :conf => @profile['drupal']['path'] do
 			sh "mkdir -p #{@profile['drupal']['path']}sites/default"
 			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
@@ -76,6 +78,12 @@ namespace :drupal do
 				sh "sudo chmod +w #{settings}"
 			end
 			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
+		end
+	end
+	
+	namespace :module do
+		task :update => 'bin/drush' do
+			@drupal.update
 		end
 	end
 	

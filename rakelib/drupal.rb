@@ -1,7 +1,8 @@
 class Drupal
 	attr :version
 
-	def initialize(path)
+	def initialize(server, path)
+		@php = Php.new server
 		@path = path
 		if File.exist? path
 			Dir.chdir @path do
@@ -10,6 +11,7 @@ class Drupal
 		else
 			@version = nil
 		end
+		@drush = "#{@php.php} #{`pwd`.strip}/bin/drush/drush.php -r ."
 	end
 
 	def major
@@ -17,9 +19,9 @@ class Drupal
 	end
 	
 	def drush(command)
-		drush = `pwd`.strip + '/bin/drush/drush'
 		Dir.chdir @path do
-			sh "#{drush} #{command}"
+			p @path
+			sh "#{@drush} #{command}"
 		end
 	end
 
@@ -37,5 +39,9 @@ class Drupal
 	
 	def enable(m)
 		self.drush "--yes enable #{m}"
+	end
+	
+	def update
+		self.drush "update"
 	end
 end
