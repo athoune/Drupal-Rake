@@ -44,4 +44,8 @@ class Drupal
 	def update
 		self.drush "update"
 	end
+	
+	def dl(m)
+		self.drush "dl #{m}"
+	end
 end

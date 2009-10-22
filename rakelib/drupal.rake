@@ -85,6 +85,10 @@ namespace :drupal do
 		task :update => 'bin/drush' do
 			@drupal.update
 		end
+		desc "download a module or a theme"
+		task :dl , [:module] do |t,args|
+			@drupal.dl args.module
+		end
 	end
 	
 	namespace :drush do
