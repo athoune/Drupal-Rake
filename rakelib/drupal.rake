@@ -43,10 +43,6 @@ namespace :drupal do
 			end
 		end
 		
-		task :patch => @profile['drupal']['path'] do
-			#[TODO] iterate over patch/*.patch and do it
-		end
-		
 		task :sites => @profile['drupal']['path'] do
 			sh "mkdir -p devel"
 			@profile['drupal']['sites'].each do |key, url|
@@ -80,7 +76,19 @@ namespace :drupal do
 			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
 		end
 	end
-	
+
+	file "#{@profile['drupal']['path']}PATCH" => @profile['drupal']['path'] do
+		if File.directory? 'patches'
+			Dir.glob('patches/*.patch').each do |patch|
+				p patch
+				sh "patch --directory=#{@profile['drupal']['path']} -N -p0 -i `pwd`/#{patch}"
+			end
+			sh "touch #{@profile['drupal']['path']}PATCH"
+		end
+	end
+
+	task :patch => "#{@profile['drupal']['path']}PATCH"
+
 	namespace :module do
 		task :update => 'bin/drush' do
 			@drupal.update
@@ -171,4 +179,8 @@ namespace :drupal do
 	
 	desc "Upgrade drupal core without breaking customize"
 	task :upgrade => 'core:upgrade'
+	
+	task :test do
+		@drupal.test
+	end
 end

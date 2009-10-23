@@ -34,7 +34,7 @@ class Drupal
 	end
 
 	def test
-		self.drush 'test'
+		self.drush 'test mail'
 	end
 	
 	def enable(m)
