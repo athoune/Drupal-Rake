@@ -180,7 +180,11 @@ namespace :drupal do
 	desc "Upgrade drupal core without breaking customize"
 	task :upgrade => 'core:upgrade'
 	
-	task :test do
+	file "#{@profile['drupal']['path']}scripts/run-tests.sh" do
+		cp "#{@profile['drupal']['path']}sites/all/modules/simpletest/run-tests.sh", "#{@profile['drupal']['path']}scripts/run-tests.sh"
+	end
+	
+	task :test => "#{@profile['drupal']['path']}scripts/run-tests.sh" do
 		@drupal.test
 	end
 end
