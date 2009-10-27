@@ -1,18 +1,19 @@
 require 'rubygems'
 require 'aws/s3'
-require 'cache'
 require 'uri'
+require 'rakelib/fetch'
+require 'rakelib/cache'
 
 include AWS::S3
 
 class S3Cache < AbstractCache
 	def initialize(url, local='file:///tmp/cache/s3')
 		@uri = URI.parse(url)
-		AWS::S3::Base.establish_connection!(
+		#AWS::S3::
+		Base.establish_connection!(
 			:access_key_id     => @uri.user,
 			:secret_access_key => @uri.password
 		)
-		@bucket = Bucket.find(@uri.host)
 		@local = CacheLocal.new URI.parse(local)
 	end
 
@@ -42,3 +43,5 @@ class S3Cache < AbstractCache
 		@local.local url
 	end
 end
+
+Fetch.register 's3', S3Cache
