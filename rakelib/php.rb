@@ -5,7 +5,8 @@ class Php
 		@server = server
 		@bin  = case server
 			when "mamp": "/Applications/MAMP/bin/php5/bin/"
-			else "/usr/bin"
+			when "macport": "/opt/local/bin/"
+			else "/usr/bin/"
 		end
 		@php    = @bin + 'php'
 		@pecl   = @bin + 'pecl'
