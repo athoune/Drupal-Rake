@@ -5,10 +5,10 @@ require 'rakelib/tools'
 require 'rakelib/subversion'
 
 @drupal ||= Drupal.new @profile['server'], @profile['drupal']['path']
-if `uname`.strip == 'Linux'
-	server = 'linux'
+if @profile.key? 'server'
+	server = @profile['server']
 else
-	server = @profile.fetch 'server', 'mamp'
+	server = (`uname`.strip == 'Linux') ? 'linux' : 'mamp'
 end
 @db ||= Db.new server, @profile['drupal']['db']
 
@@ -63,7 +63,7 @@ namespace :drupal do
 			Rake::Task["drupal:core:patch"].invoke
 			sh "mv #{backup}* #{@profile['drupal']['path']}sites/"
 			sh "rm -r #{backup}"
-			@drupal.drush 'updatedb'
+			@drupal.updatedb
 		end
 		
 		

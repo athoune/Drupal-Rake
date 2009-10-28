@@ -48,4 +48,8 @@ class Drupal
 	def dl(m)
 		self.drush "dl #{m}"
 	end
+	
+	def updatedb
+		self.drush "updatedb"
+	end
 end
