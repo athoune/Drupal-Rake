@@ -40,7 +40,8 @@ namespace :drupal do
 		
 		task :clean do
 			if File.directory? @profile['drupal']['path']
-				rm_r @profile['drupal']['path']
+				#sh "sudo chown -R #{ENV['USER']}  #{@profile['drupal']['path']}"
+				sh "sudo rm -r #{@profile['drupal']['path']}"
 			end
 		end
 		
@@ -156,7 +157,7 @@ $update_free_access = FALSE;
 		end
 		
 		desc "database setup and first import"
-		task :install => [:user, :upgrade]
+		task :install => [:upgrade]
 	end
 	
 	task :enable do
@@ -179,7 +180,12 @@ $update_free_access = FALSE;
 	task :conf => 'core:conf'
 
 	desc "Install Drupal"
-	task :install => ['core:install', 'drush:install']
+	task :install => ['drush:install', 'db:install', 'core:install']
+	
+	desc "Initialize"
+	task :init => ['drush:install','db:user', 'core:install'] do
+		p "Open /install.php"
+	end
 	
 	desc "Get the newest Drupal with the newest snapshot"
 	task :lastOne => [:clean, :install, 'db:upgrade']
