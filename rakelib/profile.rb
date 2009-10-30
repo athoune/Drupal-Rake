@@ -7,21 +7,19 @@ module Profile
 		name = (ENV.key? 'PROFILE') ? ENV['PROFILE'] : ENV['HOME'].split('/').last
 		uname = `uname`.strip.downcase
 	
+		if not File.exist? "profile.yml" or File.zero? "profile.yml"
+			raise StandardError, "You have to create a non empty profile.yml"
+		end
+		profile = YAML::load(IO.read("profile.yml"))
+
 		cnf = "profile.#{name}.#{uname}.yml"
 		if ! File.exist?(cnf)
 			cnf = "profile.#{name}.yml"
 		end
-		if ! File.exist?(cnf)
-			raise StandardError, "You have to create #{cnf}"
-		end
-		if File.exist? "profile.yml" and not File.zero? "profile.yml"
-			profile = YAML::load(IO.read("profile.yml"))
-		end
-		if profile == nil
-			profile = (YAML::load(IO.read(cnf)))
-		else
+		if File.exist?(cnf)
 			profile = profile.deep_merge!(YAML::load(IO.read(cnf)))
 		end
+		return profile
 	end
 
 end
