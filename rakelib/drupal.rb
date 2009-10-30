@@ -4,7 +4,7 @@ class Drupal
 	def initialize(server, path)
 		@php = Php.new server
 		@path = path
-		if File.exist? path
+		if File.exist? "#{path}/modules/system/system.module"
 			Dir.chdir @path do
 				@version = IO.read('modules/system/system.module').scan(/define\('VERSION', '(.*)'\);/)[0][0]
 			end

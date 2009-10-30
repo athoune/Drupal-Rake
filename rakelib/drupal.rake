@@ -29,11 +29,12 @@ namespace :drupal do
 			tarball = @fetcher.fetch url
 			sh "mkdir -p #{@profile['drupal']['path']}"
 			Dir.chdir '/tmp' do
+				folder = `tar -tf #{tarball}`.split('/')[0]
 				sh "tar -xvzf #{tarball}"
-				sh "mv /tmp/drupal-#{@profile['drupal']['version']}/* #{noTrailingSpace(@profile['drupal']['path'])}"
-				sh "mv /tmp/drupal-#{@profile['drupal']['version']}/.htaccess #{noTrailingSpace(@profile['drupal']['path'])}"
+				sh "mv /tmp/#{folder}/* #{noTrailingSpace(@profile['drupal']['path'])}"
+				sh "mv /tmp/#{folder}/.htaccess #{noTrailingSpace(@profile['drupal']['path'])}"
+				sh "rm -r #{folder}"
 			end
-			sh "rm -r /tmp/drupal-#{@profile['drupal']['version']}"
 			sh "rm -r #{@profile['drupal']['path']}sites/*"
 		end
 		
@@ -65,13 +66,22 @@ namespace :drupal do
 			sh "rm -r #{backup}"
 			@drupal.updatedb
 		end
-		
-		
+
 		task :conf => @profile['drupal']['path'] do
 			sh "mkdir -p #{@profile['drupal']['path']}sites/default"
 			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
 			if File.exist?(settings) and not File.writable?(settings)
 				sh "sudo chmod +w #{settings}"
+			end
+			if not File.exist? "template/settings.php.rhtml"
+				sh "mkdir -p template"
+				File.open("template/settings.php.rhtml", 'w') do |f|
+					f.write %{<?php
+$db_url = '<%= @profile['drupal']['db']%>';
+$db_prefix = '';
+$update_free_access = FALSE;
+}
+				end
 			end
 			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
 		end
