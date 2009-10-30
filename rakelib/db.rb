@@ -13,12 +13,14 @@ class Db
 	end
 	
 	def dump(name)
-		#[TODO] don't backup session and cache :  session cache watchdog
 		sh "mkdir -p dump"
-		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --compact --ignore-table=#{@dbname}.session --ignore-table=#{@dbname}.watchdog --ignore-table=#{@dbname}.cache --password='#{@password}' --quick --add-drop-database #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
+		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --compact --ignore-table=#{@dbname}.session --ignore-table=#{@dbname}.watchdog --ignore-table=#{@dbname}.cache --password='#{@password}' --quick --add-drop-table  #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
 	end
 	
 	def load(name)
+		if not File.exist? "dump/#{name}.sql.bz2"
+			raise StandardError, "This dimp doesn't exist : dump/#{name}.sql.bz2"
+		end
 		sh "bzcat dump/#{name}.sql.bz2 | #{@bin}mysql -h #{@uri.host} -u #{@login} --password='#{@password}' #{@dbname}"
 	end
 	
