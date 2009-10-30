@@ -8,7 +8,7 @@ include AWS::S3
 
 class S3Cache < AbstractCache
 	def initialize(url, local='file:///tmp/cache/s3')
-		@uri = URI.parse(url)
+		@uri = url
 		#AWS::S3::
 		Base.establish_connection!(
 			:access_key_id     => @uri.user,
@@ -27,20 +27,20 @@ class S3Cache < AbstractCache
 
 	def write(url)
 		@local.write url
-		S3Object.store self.s3path(url), open(@local.local url), @uri.host
+		S3Object.store self.s3path(url), File.new(@local.local(url), 'r'), @uri.host
 	end
 	
 	def fetch(url)
+		path = @local.local url
 		if not self.alreadyexist? url
-			return nil
+			self.write url
 		end
-		#p @bucket.objects
-		if not @local.alreadyexist? url
-			open(@local.local(url), 'w') do |file|
-				file.write S3Object.value(self.s3path(url), @uri.host)
-			end
+		if @local.alreadyexist? url
+			return path
+		else
+			@local.writeData url, S3Object.value(self.s3path(url), @uri.host)
 		end
-		@local.local url
+		return path
 	end
 end
 

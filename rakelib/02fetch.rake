@@ -1,4 +1,5 @@
 require 'rakelib/fetch'
+require 'rakelib/s3'
 
 @fetcher ||= Fetch::Fetcher.new((@profile.key? 'fetcher') ? @profile['fetcher']['path'] : 'file:///tmp/fetcher/')
 
