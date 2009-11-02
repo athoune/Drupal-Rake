@@ -20,6 +20,14 @@ class CacheLocal < AbstractCache
 	def alreadyexist?(url)
 		File.exist? self.local(url)
 	end
+	def writeData(url, data)
+		f = "#{@path.path}#{self.flaturl(url)}"
+		`mkdir -p #{f}`
+		p "#{@path.path}#{url.host}#{url.path}"
+		File.open("#{@path.path}#{url.host}#{url.path}", 'w') do |f|
+			f.write data
+		end
+	end
 	def write(url)
 		f = "#{@path.path}#{self.flaturl(url)}"
 		`mkdir -p #{f}`
