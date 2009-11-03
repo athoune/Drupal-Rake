@@ -5,8 +5,8 @@ class Db
 		@uri = URI.parse(url)
 		@bin = case server
 			when 'mamp':    '/Applications/MAMP/Library/bin/'
-			when 'macport': '/opt/local/bin'
-			else            '/usr/bin'
+			when 'macport': '/opt/local/bin/'
+			else            '/usr/bin/'
 		end
 		@login, @password = @uri.userinfo.split(':')
 		@dbname = @uri.path[1,@uri.path.length]
@@ -14,7 +14,10 @@ class Db
 	
 	def dump(name)
 		sh "mkdir -p dump"
-		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --compact --ignore-table=#{@dbname}.session --ignore-table=#{@dbname}.watchdog --ignore-table=#{@dbname}.cache --password='#{@password}' --quick --add-drop-table  #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
+		sh %{  #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute "TRUNCATE #{@dbname}.sessions"; true}
+		sh %{  #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute "TRUNCATE #{@dbname}.watchdog"; true}
+		sh %{  #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute "TRUNCATE #{@dbname}.cache"; true}
+		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --compact --password='#{@password}' --quick --add-drop-table  #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
 	end
 	
 	def load(name)
