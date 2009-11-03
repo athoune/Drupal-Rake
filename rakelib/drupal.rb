@@ -52,6 +52,6 @@ class Drupal
 	end
 	
 	def updatedb
-		self.drush "updatedb"
+		self.drush "--yes updatedb"
 	end
 end
