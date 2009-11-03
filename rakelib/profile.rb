@@ -1,10 +1,11 @@
 require 'yaml'
+require 'rubygems'
 require 'deep_merge'
 
 module Profile
 
 	def Profile.profile
-		name = (ENV.key? 'PROFILE') ? ENV['PROFILE'] : ENV['HOME'].split('/').last
+		name = ENV.fetch('PROFILE', ENV['HOME'].split('/').last).downcase
 		uname = `uname`.strip.downcase
 	
 		if not File.exist? "profile.yml" or File.zero? "profile.yml"
@@ -18,6 +19,7 @@ module Profile
 		end
 		if File.exist?(cnf)
 			profile = profile.deep_merge!(YAML::load(IO.read(cnf)))
+			p "profile: #{cnf}"
 		end
 		return profile
 	end
