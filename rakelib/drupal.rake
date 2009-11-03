@@ -3,7 +3,9 @@ require 'rakelib/db'
 require 'rakelib/php'
 require 'rakelib/tools'
 require 'rakelib/subversion'
+require 'rakelib/profile'
 
+@profile ||= Profile.profile
 @drupal ||= Drupal.new @profile['server'], @profile['drupal']['path']
 if @profile.key? 'server'
 	server = @profile['server']
@@ -133,7 +135,7 @@ $update_free_access = FALSE;
 
 		desc "Make a db snapshot"
 		task :dump do
-			@drupal.drush 'cache clear'
+			#@drupal.drush 'cache clear'
 			@db.dump dump
 		end
 		
@@ -149,7 +151,8 @@ $update_free_access = FALSE;
 		
 		task :_load do
 			@db.load dump
-			@drupal.drush '-y updatedb'
+			@drupal.updatedb
+			@drupal.drush 'cache clear'
 		end
 		
 		task :user do
@@ -189,6 +192,8 @@ $update_free_access = FALSE;
 	
 	desc "Get the newest Drupal with the newest snapshot"
 	task :lastOne => [:clean, :install, 'db:upgrade']
+	
+	task :update => ["drush:install", 'core:install']
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
