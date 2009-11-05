@@ -11,7 +11,13 @@ class Drupal
 		else
 			@version = nil
 		end
-		@drush = "#{@php.php} #{`pwd`.strip}/bin/drush/drush.php -r ."
+		# --user 1
+		# --root=.
+		if `uname`.strip == 'Darwin'
+			@drush = "#{@php.php} #{`pwd`.strip}/bin/drush/drush.php "
+		else
+			@drush = "#{`pwd`.strip}/bin/drush/drush -u 1"
+		end
 	end
 
 	def major
