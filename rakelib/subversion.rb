@@ -13,7 +13,7 @@ module Subversion
 			`rm -rf #{folder}`
 		end
 		`mkdir -p #{folder}`
-		svn_checkout repo, folder
+		Subversion.checkout repo, folder
 		repos = []
 		Dir["#{folder}/**/*"].each do |f|
 			repos << f[16..f.length]
