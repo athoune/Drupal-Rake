@@ -110,11 +110,26 @@ $update_free_access = FALSE;
 		task :dl , [:module] do |t,args|
 			@drupal.dl args.module
 		end
+		desc "Commit un module passé en argument"
+		task :commit, [:truc] do |t, args|
+			puts "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
+			if File.exist? "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
+				Subversion.autocommit "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}", "#{@profile['drupal']['sites']['all']}/modules/#{args.truc}"
+				exit
+			end
+=begin
+			if File.exist? "#{@drupal_webdir}/sites/all/themes/#{args.truc}"
+				Subversion.autocommit "#{@drupal_webdir}/sites/all/themes/#{args.truc}", "#{p['svn_ohm']}/sites/trunk/all/themes/#{args.truc}"
+				exit
+			end
+=end
+			raise StandardError, "#{args.truc} n'est ni un module, ni un theme"
+		end
 	end
 	
 	namespace :drush do
 		file 'bin/drush' do
-			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-Versions-2.0.tar.gz"
+			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-Versions-2.1.tar.gz"
 			sh "mkdir -p bin"
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"
