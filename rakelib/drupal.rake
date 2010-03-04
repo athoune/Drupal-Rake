@@ -129,7 +129,7 @@ $update_free_access = FALSE;
 	
 	namespace :drush do
 		file 'bin/drush' do
-			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-Versions-2.1.tar.gz"
+			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-versions-3.0-beta1.tar.gz"
 			sh "mkdir -p bin"
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"

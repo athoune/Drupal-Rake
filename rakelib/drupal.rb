@@ -26,10 +26,7 @@ class Drupal
 	
 	def drush(command)
 		if File.exist? @path
-			Dir.chdir @path do
-				p @path
-				sh "#{@drush} #{command}"
-			end
+			sh "cd #{@path} && #{@drush} #{command}"
 		end
 	end
 
