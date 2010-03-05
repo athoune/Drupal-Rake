@@ -128,16 +128,19 @@ $update_free_access = FALSE;
 	end
 	
 	namespace :drush do
-		file 'bin/drush' do
-			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-All-versions-3.0-beta1.tar.gz"
+		DRUSH_VERSION = "All-versions-3.0-beta1"
+		file "bin/drush/#{DRUSH_VERSION}.version" do
+			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-#{DRUSH_VERSION}.tar.gz"
+			Rake::Task['drupal:drush:clean'].invoke
 			sh "mkdir -p bin"
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"
 			end
 			sh "chmod +x bin/drush/drush"
+			sh "touch bin/drush/#{DRUSH_VERSION}.version"
 		end
 		
-		task :install => 'bin/drush'
+		task :install => "bin/drush/#{DRUSH_VERSION}.version"
 		task :clean do
 			if File.exist? 'bin/drush'
 				rm_r 'bin/drush'
