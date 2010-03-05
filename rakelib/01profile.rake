@@ -1,7 +1,7 @@
 require 'rakelib/profile'
 
 @profile ||= Profile.profile
-mkdir_p 'etc'
+directory 'etc'
 @etc ||= "#{`pwd`.strip}/etc"
 
 namespace :profile do
