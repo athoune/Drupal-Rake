@@ -24,9 +24,10 @@ class Drupal
 		@version.split('.')[0..1].join('.')
 	end
 	
-	def drush(command)
+	def drush(command, root=false)
 		if File.exist? @path
-			sh "cd #{@path} && #{@drush} #{command}"
+			su = root ? "sudo":""
+			sh "cd #{@path} && #{su} #{@drush} -u 1 #{command}"
 		end
 	end
 
@@ -35,7 +36,7 @@ class Drupal
 	end
 
 	def clear_cache
-		self.drush 'cache clear'
+		self.drush 'cc all', true
 	end
 
 	def test

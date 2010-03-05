@@ -167,7 +167,7 @@ $update_free_access = FALSE;
 		task :_load do
 			@db.load dump
 			@drupal.updatedb
-			@drupal.drush 'cache clear'
+			@drupal.clear_cache
 		end
 		
 		task :user do
