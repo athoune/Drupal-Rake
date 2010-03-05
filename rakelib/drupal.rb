@@ -24,13 +24,6 @@ class Drupal
 		@version.split('.')[0..1].join('.')
 	end
 	
-	def drush(command, root=false)
-		if File.exist? @path
-			su = root ? "sudo":""
-			sh "cd #{@path} && #{su} #{@drush} -u 1 #{command}"
-		end
-	end
-
 	def cron
 		self.drush 'cron'
 	end
@@ -58,4 +51,13 @@ class Drupal
 	def updatedb
 		self.drush "--yes updatedb"
 	end
+
+	private
+	def drush(command, root=false)
+		if File.exist? @path
+			su = root ? "sudo":""
+			sh "cd #{@path} && #{su} #{@drush} -u 1 #{command}"
+		end
+	end
+
 end
