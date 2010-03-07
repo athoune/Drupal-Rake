@@ -1,0 +1,10 @@
+server: 'mamp'
+web:
+  host: 'localhost'
+drupal:
+  flavor: 'vanilla'
+  version: '6.16'
+  path:    '/Applications/MAMP/htdocs/drupal-test/'
+  db:      'mysqli://test:pwd@localhost/drupal_test'
+  cache: false
+  appli: 'drupal-test'
