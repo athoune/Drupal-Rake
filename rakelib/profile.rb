@@ -1,6 +1,6 @@
 require 'yaml'
 require 'rubygems'
-require 'deep_merge'
+gem 'deep_merge'
 
 module Profile
 
