@@ -63,7 +63,7 @@ namespace :drupal do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
 			sh "mkdir -p #{backup}"
 			sh "cp -r #{@profile['drupal']['path']}sites/* #{backup}"
-			rm_r @profile['drupal']['path']
+			sh "sudo rm -r #{@profile['drupal']['path']}"
 			Rake::Task["drupal:core:patch"].invoke
 			sh "mv #{backup}* #{@profile['drupal']['path']}sites/"
 			sh "rm -r #{backup}"
@@ -88,6 +88,9 @@ $update_free_access = FALSE;
 			end
 			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
 		end
+
+		task :patch => "#{@profile['drupal']['path']}PATCH"
+
 	end
 
 	file "#{@profile['drupal']['path']}PATCH" => @profile['drupal']['path'] do
@@ -99,8 +102,6 @@ $update_free_access = FALSE;
 			sh "touch #{@profile['drupal']['path']}PATCH"
 		end
 	end
-
-	task :patch => "#{@profile['drupal']['path']}PATCH"
 
 	namespace :module do
 		task :update => 'drush:install' do
@@ -173,6 +174,7 @@ $update_free_access = FALSE;
 			@drupal.clear_cache
 		end
 		
+		desc "create db user"
 		task :user do
 			@db.create_user 
 		end
@@ -217,7 +219,7 @@ $update_free_access = FALSE;
 	task :clean => ['core:clean', 'drush:clean']
 	
 	desc "Upgrade drupal core without breaking customize"
-	task :upgrade => 'core:upgrade'
+	task :upgrade => 'core:upgradeCore'
 	
 	file "#{@profile['drupal']['path']}scripts/run-tests.sh" do
 		cp "#{@profile['drupal']['path']}sites/all/modules/simpletest/run-tests.sh", "#{@profile['drupal']['path']}scripts/run-tests.sh"
