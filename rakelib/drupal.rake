@@ -48,7 +48,7 @@ namespace :drupal do
 		end
 		
 		task :sites => @profile['drupal']['path'] do
-			sh "mkdir -p devel"
+			directory 'devel'
 			@profile['drupal']['sites'].each do |key, url|
 				Subversion.get url, "#{@profile['drupal']['path']}sites/#{key}"
 				if not File.exist? "devel/#{key}"
@@ -71,13 +71,13 @@ namespace :drupal do
 		end
 
 		task :conf => @profile['drupal']['path'] do
-			sh "mkdir -p #{@profile['drupal']['path']}sites/default"
+			directory "#{@profile['drupal']['path']}sites/default"
 			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
 			if File.exist?(settings) and not File.writable?(settings)
 				sh "sudo chmod +w #{settings}"
 			end
 			if not File.exist? "template/settings.php.rhtml"
-				sh "mkdir -p template"
+				directory "template"
 				File.open("template/settings.php.rhtml", 'w') do |f|
 					f.write %{<?php
 $db_url = '<%= @profile['drupal']['db']%>';
@@ -103,14 +103,14 @@ $update_free_access = FALSE;
 	task :patch => "#{@profile['drupal']['path']}PATCH"
 
 	namespace :module do
-		task :update => 'bin/drush' do
+		task :update => 'drush:install' do
 			@drupal.update
 		end
 		desc "download a module or a theme"
 		task :dl , [:module] do |t,args|
 			@drupal.dl args.module
 		end
-		desc "Commit un module passé en argument"
+		desc "Commit a module"
 		task :commit, [:truc] do |t, args|
 			puts "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
 			if File.exist? "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
@@ -123,7 +123,7 @@ $update_free_access = FALSE;
 				exit
 			end
 =end
-			raise StandardError, "#{args.truc} n'est ni un module, ni un theme"
+			raise StandardError, "#{args.truc} is neither a module, nor a theme"
 		end
 	end
 	
@@ -132,7 +132,7 @@ $update_free_access = FALSE;
 		file "bin/drush/#{DRUSH_VERSION}.version" do
 			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-#{DRUSH_VERSION}.tar.gz"
 			Rake::Task['drupal:drush:clean'].invoke
-			sh "mkdir -p bin"
+			directory 'bin'
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"
 			end
@@ -204,14 +204,14 @@ $update_free_access = FALSE;
 	task :install => ['drush:install', 'db:install', 'core:install']
 	
 	desc "Initialize"
-	task :init => ['drush:install','db:user', 'core:install'] do
+	task :init => ['drush:install', 'db:user', 'core:install'] do
 		p "Open /install.php"
 	end
 	
 	desc "Get the newest Drupal with the newest snapshot"
 	task :lastOne => [:clean, :install, 'db:upgrade']
 	
-	task :update => ["drush:install", 'core:install']
+	task :update => ['drush:install', 'core:install']
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
