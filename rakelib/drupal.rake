@@ -59,8 +59,19 @@ namespace :drupal do
 		end
 		
 		task :init => [:patch, :conf, "#{@profile['drupal']['path']}sites/default/files"] do
-			directory '../sites/all'
-			Subversion.add '../sites/all'
+			mkdir_p '../sites/all/modules/custom'
+			#mkdir_p ''
+			Subversion.add '../sites'
+			Subversion.commit '../sites', 'initial folders'
+			url = Subversion.url '..'
+			Subversion.checkout "#{url}/sites/all", "#{@profile['drupal']['path']}sites/all"
+			profile = Profile.read("profile.yml")
+			if not profile['drupal'].key? 'sites'
+				profile['drupal']['sites'] = {}
+			end
+			profile['drupal']['sites']['all'] = "#{url}/sites/all"
+			Profile.write('profile.yml', profile)
+			puts "[Info] profile.yml is modified"
 		end
 		task :install => [:init, :sites]
 		
