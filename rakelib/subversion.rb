@@ -74,7 +74,7 @@ module Subversion
 		if attributes != nil
 			doc.elements[elements].attributes[attributes]
 		else
-			doc.elements[elements]
+			doc.elements[elements].text
 		end
 	end
 
@@ -83,10 +83,10 @@ module Subversion
 	end
 	
 	def Subversion.url(path = '.')
-		Subversion.info path, 'url'
+		Subversion.info path, 'info/entry/url'
 	end
 	
 	def Subversion.add(path)
-		`svn add #{path}`
+		sh "svn add #{path}"
 	end
 end
