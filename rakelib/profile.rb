@@ -22,7 +22,7 @@ module Profile
 		end
 		if File.exist?(cnf)
 			profile = profile.deep_merge!(YAML::load(IO.read(cnf)))
-			p "profile: #{cnf}"
+			puts "[Info] using profile: #{cnf}"
 		end
 		return profile
 	end
