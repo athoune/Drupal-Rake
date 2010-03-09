@@ -32,6 +32,7 @@ namespace :drupal do
 			sh "mkdir -p #{@profile['drupal']['path']}"
 			Dir.chdir '/tmp' do
 				folder = `tar -tf #{tarball}`.split('/')[0]
+				sh "rm -r #{folder}" if File.exist? folder
 				sh "tar -xvzf #{tarball}"
 				sh "mv /tmp/#{folder}/* #{noTrailingSpace(@profile['drupal']['path'])}"
 				sh "mv /tmp/#{folder}/.htaccess #{noTrailingSpace(@profile['drupal']['path'])}"
@@ -48,7 +49,7 @@ namespace :drupal do
 		end
 		
 		task :sites => @profile['drupal']['path'] do
-			sh "mkdir -p devel"
+			directory 'devel'
 			@profile['drupal']['sites'].each do |key, url|
 				Subversion.get url, "#{@profile['drupal']['path']}sites/#{key}"
 				if not File.exist? "devel/#{key}"
@@ -67,7 +68,7 @@ namespace :drupal do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
 			sh "mkdir -p #{backup}"
 			sh "cp -r #{@profile['drupal']['path']}sites/* #{backup}"
-			rm_r @profile['drupal']['path']
+			sh "sudo rm -r #{@profile['drupal']['path']}"
 			Rake::Task["drupal:core:patch"].invoke
 			sh "mv #{backup}* #{@profile['drupal']['path']}sites/"
 			sh "rm -r #{backup}"
@@ -75,13 +76,13 @@ namespace :drupal do
 		end
 
 		task :conf => @profile['drupal']['path'] do
-			sh "mkdir -p #{@profile['drupal']['path']}sites/default"
+			mkdir_p "#{@profile['drupal']['path']}sites/default"
 			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
 			if File.exist?(settings) and not File.writable?(settings)
 				sh "sudo chmod +w #{settings}"
 			end
 			if not File.exist? "template/settings.php.rhtml"
-				sh "mkdir -p template"
+				directory "template"
 				File.open("template/settings.php.rhtml", 'w') do |f|
 					f.write %{<?php
 $db_url = '<%= @profile['drupal']['db']%>';
@@ -92,6 +93,9 @@ $update_free_access = FALSE;
 			end
 			generate "template/settings.php.rhtml", "#{@profile['drupal']['path']}sites/default/settings.php"
 		end
+
+		task :patch => "#{@profile['drupal']['path']}PATCH"
+
 	end
 
 	file "#{@profile['drupal']['path']}PATCH" => @profile['drupal']['path'] do
@@ -104,17 +108,15 @@ $update_free_access = FALSE;
 		end
 	end
 
-	task :patch => "#{@profile['drupal']['path']}PATCH"
-
 	namespace :module do
-		task :update => 'bin/drush' do
+		task :update => 'drush:install' do
 			@drupal.update
 		end
 		desc "download a module or a theme"
 		task :dl , [:module] do |t,args|
 			@drupal.dl args.module
 		end
-		desc "Commit un module passé en argument"
+		desc "Commit a module"
 		task :commit, [:truc] do |t, args|
 			puts "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
 			if File.exist? "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
@@ -127,7 +129,7 @@ $update_free_access = FALSE;
 				exit
 			end
 =end
-			raise StandardError, "#{args.truc} n'est ni un module, ni un theme"
+			raise StandardError, "#{args.truc} is neither a module, nor a theme"
 		end
 	end
 	
@@ -136,7 +138,7 @@ $update_free_access = FALSE;
 		file "bin/drush/#{DRUSH_VERSION}.version" do
 			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-#{DRUSH_VERSION}.tar.gz"
 			Rake::Task['drupal:drush:clean'].invoke
-			sh "mkdir -p bin"
+			directory 'bin'
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"
 			end
@@ -177,6 +179,7 @@ $update_free_access = FALSE;
 			@drupal.clear_cache
 		end
 		
+		desc "create db user"
 		task :user do
 			@db.create_user 
 		end
@@ -205,7 +208,7 @@ $update_free_access = FALSE;
 	task :conf => 'core:conf'
 
 	desc "Install Drupal"
-	task :install => ['drush:install', 'db:install', 'core:install']
+	task :install => ['drush:install', 'core:install', 'db:install']
 	
 	desc "Initialize"
 	task :init => ['drush:install','db:user', 'core:init'] do
@@ -215,13 +218,13 @@ $update_free_access = FALSE;
 	desc "Get the newest Drupal with the newest snapshot"
 	task :lastOne => [:clean, :install, 'db:upgrade']
 	
-	task :update => ["drush:install", 'core:install']
+	task :update => ['drush:install', 'core:install']
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
 	
 	desc "Upgrade drupal core without breaking customize"
-	task :upgrade => 'core:upgrade'
+	task :upgrade => 'core:upgradeCore'
 	
 	file "#{@profile['drupal']['path']}scripts/run-tests.sh" do
 		cp "#{@profile['drupal']['path']}sites/all/modules/simpletest/run-tests.sh", "#{@profile['drupal']['path']}scripts/run-tests.sh"

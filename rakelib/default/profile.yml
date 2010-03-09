@@ -1,6 +1,7 @@
 server: 'mamp'
 web:
   host: 'localhost'
+  port: 8888
 drupal:
   flavor: 'vanilla'
   version: '6.16'

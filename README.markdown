@@ -1,7 +1,8 @@
 Build your Drupal project with Rake
 ===================================
 
-With a build tool, you can work in a Drupal project, with different environements, like working on a Mac, and deploying it on a Linux.
+With a build tool, you can work in a Drupal project, with different environements,
+like working on a Mac, and deploying it on a Linux.
 All your work is managed by a versionning tool, Subversion.
 
 Profile

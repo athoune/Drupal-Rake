@@ -16,7 +16,7 @@ class Drupal
 		if `uname`.strip == 'Darwin'
 			@drush = "#{@php.php} #{`pwd`.strip}/bin/drush/drush.php "
 		else
-			@drush = "#{`pwd`.strip}/bin/drush/drush -u 1"
+			@drush = "#{`pwd`.strip}/bin/drush/drush"
 		end
 	end
 
@@ -25,34 +25,35 @@ class Drupal
 	end
 	
 	def cron
-		self.drush 'cron'
+		drush 'cron'
 	end
 
 	def clear_cache
-		self.drush 'cc all', true
+		drush 'cc all', true
 	end
 
 	def test
-		self.drush 'test mail'
+		drush 'test mail'
 	end
 	
 	def enable(m)
-		self.drush "--yes enable #{m}"
+		drush "--yes enable #{m}"
 	end
 	
 	def update
-		self.drush "update"
+		drush "update"
 	end
 	
 	def dl(m)
-		self.drush "dl #{m}"
+		drush "dl #{m}"
 	end
 	
 	def updatedb
-		self.drush "--yes updatedb"
+		drush "--yes updatedb"
 	end
 
 	private
+	
 	def drush(command, root=false)
 		if File.exist? @path
 			su = root ? "sudo":""
