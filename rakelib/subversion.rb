@@ -68,9 +68,26 @@ module Subversion
 			Subversion.checkout url, target
 		end
 	end
-
-	def Subversion.info(url)
+	
+	def Subversion.info(url, elements, attributes = nil)
 		doc = REXML::Document.new `svn info --xml #{url}`
-		return doc.elements['info/entry'].attributes['revision']
+		if attributes != nil
+			doc.elements[elements].attributes[attributes]
+		else
+			doc.elements[elements]
+	end
+
+	def Subversion.revision(url)
+		Subversion.info url, 'info/entry', 'revision'
+	end
+	
+	def Subversion.url(path = '.')
+		Subversion.info path, 'url'
+	end
+	
+	def Subversion.add(path)
+		`svn add #{path}`
 	end
 end
+
+p Subversion.url
