@@ -75,6 +75,7 @@ module Subversion
 			doc.elements[elements].attributes[attributes]
 		else
 			doc.elements[elements]
+		end
 	end
 
 	def Subversion.revision(url)
@@ -89,5 +90,3 @@ module Subversion
 		`svn add #{path}`
 	end
 end
-
-p Subversion.url
