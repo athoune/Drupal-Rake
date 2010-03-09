@@ -26,5 +26,15 @@ module Profile
 		end
 		return profile
 	end
+	
+	def Profile.read(path)
+		return YAML::load(IO.read(path))
+	end
+	
+	def Profile.write(path, data)
+		f = File.open(path, 'w')
+		f.write(data.to_yaml)
+		f.close
+	end
 
 end
