@@ -49,15 +49,15 @@ module Subversion
 		#path = "/tmp/svn/tmp/#{hash}/#{revision}"
 		#mkdir_p path
 		#`svn co #{url} #{path}`
-		`svn co #{url} #{target}`
+		puts `svn co #{url} #{target}`
 	end
 
 	def Subversion.update(target)
 		puts "[SVN] Update de #{target}"
 		if File.file? target
-			`svn update #{target}`
+			puts `svn update #{target}`
 		else
-			`cd #{target} && svn update`
+			puts `cd #{target} && svn update`
 		end
 	end
 
