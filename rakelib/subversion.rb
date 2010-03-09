@@ -52,12 +52,16 @@ module Subversion
 		puts `svn co #{url} #{target}`
 	end
 
+	def Subversion.commit(target, message = '')
+		sh "svn commit -m \"#{message}\" #{target}"
+	end
+
 	def Subversion.update(target)
 		puts "[SVN] Update de #{target}"
 		if File.file? target
-			puts `svn update #{target}`
+			sh "svn update #{target}"
 		else
-			puts `cd #{target} && svn update`
+			sh "cd #{target} && svn update"
 		end
 	end
 
