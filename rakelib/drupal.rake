@@ -32,6 +32,7 @@ namespace :drupal do
 			sh "mkdir -p #{@profile['drupal']['path']}"
 			Dir.chdir '/tmp' do
 				folder = `tar -tf #{tarball}`.split('/')[0]
+				sh "rm -r #{folder}" if File.exist? folder
 				sh "tar -xvzf #{tarball}"
 				sh "mv /tmp/#{folder}/* #{noTrailingSpace(@profile['drupal']['path'])}"
 				sh "mv /tmp/#{folder}/.htaccess #{noTrailingSpace(@profile['drupal']['path'])}"
@@ -71,7 +72,7 @@ namespace :drupal do
 		end
 
 		task :conf => @profile['drupal']['path'] do
-			directory "#{@profile['drupal']['path']}sites/default"
+			mkdir_p "#{@profile['drupal']['path']}sites/default"
 			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
 			if File.exist?(settings) and not File.writable?(settings)
 				sh "sudo chmod +w #{settings}"
@@ -203,7 +204,7 @@ $update_free_access = FALSE;
 	task :conf => 'core:conf'
 
 	desc "Install Drupal"
-	task :install => ['drush:install', 'db:install', 'core:install']
+	task :install => ['drush:install', 'core:install', 'db:install']
 	
 	desc "Initialize"
 	task :init => ['drush:install', 'db:user', 'core:install'] do
