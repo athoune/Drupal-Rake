@@ -57,7 +57,11 @@ namespace :drupal do
 			end
 		end
 		
-		task :install => [:patch, :sites, :conf, "#{@profile['drupal']['path']}sites/default/files"]
+		task :init => [:patch, :conf, "#{@profile['drupal']['path']}sites/default/files"] do
+			directory '../sites/all'
+			Subversion.add '../sites/all'
+		end
+		task :install => [:init, :sites]
 		
 		task :upgradeCore do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
@@ -204,8 +208,8 @@ $update_free_access = FALSE;
 	task :install => ['drush:install', 'db:install', 'core:install']
 	
 	desc "Initialize"
-	task :init => ['drush:install','db:user', 'core:install'] do
-		p "Open /install.php"
+	task :init => ['drush:install','db:user', 'core:init'] do
+		p "Open http://#{@profile['web']['host']}:#{@profile['web']['port']}/#{@profile['drupal']['appli']}/install.php"
 	end
 	
 	desc "Get the newest Drupal with the newest snapshot"
