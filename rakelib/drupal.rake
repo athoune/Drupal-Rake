@@ -83,7 +83,7 @@ namespace :drupal do
 			sh "cp -r #{@profile['drupal']['path']}sites/* #{backup}"
 			sh "sudo rm -r #{@profile['drupal']['path']}"
 			Rake::Task["drupal:core:patch"].invoke
-			sh "mv #{backup}* #{@profile['drupal']['path']}sites/"
+			sh "sudo mv #{backup}* #{@profile['drupal']['path']}sites/"
 			sh "rm -r #{backup}"
 			@drupal.updatedb
 		end
