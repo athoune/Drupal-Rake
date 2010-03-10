@@ -49,7 +49,7 @@ module Subversion
 		#path = "/tmp/svn/tmp/#{hash}/#{revision}"
 		#mkdir_p path
 		#`svn co #{url} #{path}`
-		puts `svn co #{url} #{target}`
+		sh "svn co #{url} #{target}"
 	end
 
 	def Subversion.commit(target, message = '')

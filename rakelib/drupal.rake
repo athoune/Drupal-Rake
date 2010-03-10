@@ -61,19 +61,21 @@ namespace :drupal do
 		task :init => [:patch, :conf, "#{@profile['drupal']['path']}sites/default/files"] do
 			mkdir_p '../sites/all/modules/custom'
 			#mkdir_p ''
-			Subversion.add '../sites'
-			Subversion.commit '../sites', 'initial folders'
-			url = Subversion.url '..'
-			Subversion.checkout "#{url}/sites/all", "#{@profile['drupal']['path']}sites/all"
-			profile = Profile.read("profile.yml")
-			if not profile['drupal'].key? 'sites'
-				profile['drupal']['sites'] = {}
+			if not File.exist? '../sites/.svn'
+				Subversion.add '../sites'
+				Subversion.commit '../sites', 'initial folders'
+				url = Subversion.url '..'
+				Subversion.checkout "#{url}/sites/all", "#{@profile['drupal']['path']}sites/all"
+				profile = Profile.read("profile.yml")
+				if not profile['drupal'].key? 'sites'
+					profile['drupal']['sites'] = {}
+				end
+				profile['drupal']['sites']['all'] = "#{url}/sites/all"
+				Profile.write('profile.yml', profile)
+				puts "[Info] profile.yml is modified"
 			end
-			profile['drupal']['sites']['all'] = "#{url}/sites/all"
-			Profile.write('profile.yml', profile)
-			puts "[Info] profile.yml is modified"
 		end
-		task :install => [:init, :sites]
+		task :install => [:patch, :conf, "#{@profile['drupal']['path']}sites/default/files", :sites]
 		
 		task :upgradeCore do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
