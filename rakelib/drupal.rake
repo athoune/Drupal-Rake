@@ -216,6 +216,18 @@ $update_free_access = FALSE;
 		end
 	end
 	
+	task :variables => DRUSH_INSTALLED do
+		if @profile['drupal'].key? 'variables'
+			@profile['drupal']['variables'].each do |k,v|
+				if v == nil
+					@drupal.vdel k
+				else
+					@drupal.vset k, v
+				end
+			end
+		end
+	end
+	
 	desc "Launch cron task"
 	task :cron => DRUSH_INSTALLED do
 		@drupal.cron
@@ -230,7 +242,7 @@ $update_free_access = FALSE;
 	task :conf => 'drupal:core:conf'
 
 	desc "Install Drupal"
-	task :install => ['drush:install', 'core:install', 'db:install']
+	task :install => ['db:install', :update]
 	
 	desc "Initialize"
 	task :init => ['drush:install','db:user', 'core:init'] do
@@ -240,7 +252,7 @@ $update_free_access = FALSE;
 	desc "Get the newest Drupal with the newest snapshot"
 	task :lastOne => [:clean, :install, 'db:upgrade']
 	
-	task :update => ['core:install']
+	task :update => ['core:install', :variables]
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']

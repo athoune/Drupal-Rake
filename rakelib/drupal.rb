@@ -25,7 +25,7 @@ class Drupal
 	end
 	
 	def cron
-		drush 'cron'
+		drush 'cron ; true'
 	end
 
 	def clear_cache
@@ -50,6 +50,18 @@ class Drupal
 	
 	def updatedb
 		drush "--yes updatedb"
+	end
+
+	def vset(key, value)
+		drush "--yes vset #{key} \"#{value}\""
+	end
+	
+	def vget(key)
+		drush "vget #{key}"
+	end
+
+	def vdel(key)
+		drush "vdel #{key}"
 	end
 
 	private
