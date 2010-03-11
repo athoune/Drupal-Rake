@@ -5,6 +5,28 @@ With a build tool, you can work in a Drupal project, with different environement
 like working on a Mac, and deploying it on a Linux.
 All your work is managed by a versionning tool, Subversion.
 
+Install
+=======
+
+The rubygem of Ubuntu 8.04 is rotten. Fetch the last one : http://rubygems.org/pages/download
+
+	tar -xvzf rubygems-1.3.6.tgz
+	cd rubygems-1.3.6
+	sudo ruby setup.rb
+	sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
+	sudo gem update –system
+
+rake is rotten too :
+
+	sudo gem install rake
+
+The rubygems installed in Snow Leopard is just fine.
+
+You can now install dependencies :
+
+	sudo gem install deep_merge
+	sudo gem install aws-s3
+
 Profile
 =======
 All configurations are done in a YAML file.
