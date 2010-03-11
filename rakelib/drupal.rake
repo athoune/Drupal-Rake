@@ -14,15 +14,21 @@ else
 end
 @db ||= Db.new server, @profile['drupal']['db']
 
+DRUSH_VERSION = "All-versions-3.0-beta1"
+DRUPAL_INSTALLED = "#{@profile['drupal']['path']}/index.php"
+DRUSH_INSTALLED = "bin/drush/#{DRUSH_VERSION}.version"
+
 namespace :drupal do
 	namespace :core do
-		file "#{@profile['drupal']['path']}sites/default/files" => @profile['drupal']['path'] do
+		
+		file "#{@profile['drupal']['path']}/sites/default/files" => DRUPAL_INSTALLED do
 			# [TODO] use real Drupal default/files
 			# [TODO] rights
 			sh "sudo mkdir -p #{@profile['drupal']['path']}sites/default/files && sudo chmod 777 #{@profile['drupal']['path']}sites/default/files" 
 		end
 		
-		file @profile['drupal']['path'] do
+		#naked drupal
+		file DRUPAL_INSTALLED do
 			url = case @profile['drupal'].fetch('flavor', 'vanilla')
 				when 'pressflow' : "http://launchpad.net/pressflow/6.x/#{@profile['drupal']['version']}/+download/pressflow-#{@profile['drupal']['version']}.tar.gz"
 				when 'acquia' :    "http://acquia.com/files/downloads/acquia-drupal-#{@profile['drupal']['version']}.tar.gz"
@@ -48,8 +54,9 @@ namespace :drupal do
 			end
 		end
 		
-		task :sites => @profile['drupal']['path'] do
-			directory 'devel'
+		#install or update sites data
+		task :sites => DRUPAL_INSTALLED do
+			mkdir_p 'devel'
 			@profile['drupal']['sites'].each do |key, url|
 				Subversion.get url, "#{@profile['drupal']['path']}sites/#{key}"
 				if not File.exist? "devel/#{key}"
@@ -75,7 +82,10 @@ namespace :drupal do
 				puts "[Info] profile.yml is modified"
 			end
 		end
-		task :install => [:patch, :conf, "#{@profile['drupal']['path']}sites/default/files", :sites]
+		task :install => [:patch, :conf, :sites, "drupal:cron"] do
+			@drupal.updatedb
+			@drupal.clear_cache
+		end
 		
 		task :upgradeCore do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
@@ -95,7 +105,7 @@ namespace :drupal do
 				sh "sudo chmod +w #{settings}"
 			end
 			if not File.exist? "template/settings.php.rhtml"
-				directory "template"
+				mkdir_p "template"
 				File.open("template/settings.php.rhtml", 'w') do |f|
 					f.write %{<?php
 $db_url = '<%= @profile['drupal']['db']%>';
@@ -111,7 +121,7 @@ $update_free_access = FALSE;
 
 	end
 
-	file "#{@profile['drupal']['path']}PATCH" => @profile['drupal']['path'] do
+	file "#{@profile['drupal']['path']}PATCH" => DRUPAL_INSTALLED do
 		if File.directory? 'patches'
 			Dir.glob('patches/*.patch').each do |patch|
 				p patch
@@ -122,15 +132,15 @@ $update_free_access = FALSE;
 	end
 
 	namespace :module do
-		task :update => 'drush:install' do
+		task :update => [DRUSH_INSTALLED, DRUPAL_INSTALLED] do
 			@drupal.update
 		end
 		desc "download a module or a theme"
-		task :dl , [:module] do |t,args|
+		task :dl, [:module]  => DRUSH_INSTALLED do |t,args|
 			@drupal.dl args.module
 		end
 		desc "Commit a module"
-		task :commit, [:truc] do |t, args|
+		task :commit, [:truc] => DRUSH_INSTALLED do |t, args|
 			puts "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
 			if File.exist? "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}"
 				Subversion.autocommit "#{@profile['drupal']['path']}sites/all/modules/#{args.truc}", "#{@profile['drupal']['sites']['all']}/modules/#{args.truc}"
@@ -147,11 +157,10 @@ $update_free_access = FALSE;
 	end
 	
 	namespace :drush do
-		DRUSH_VERSION = "All-versions-3.0-beta1"
-		file "bin/drush/#{DRUSH_VERSION}.version" do
+		file DRUSH_INSTALLED => "drupal:conf" do
 			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-#{DRUSH_VERSION}.tar.gz"
 			Rake::Task['drupal:drush:clean'].invoke
-			directory 'bin'
+			mkdir_p 'bin'
 			Dir.chdir 'bin' do
 				sh "tar -xvzf #{drush}"
 			end
@@ -159,7 +168,7 @@ $update_free_access = FALSE;
 			sh "touch bin/drush/#{DRUSH_VERSION}.version"
 		end
 		
-		task :install => "bin/drush/#{DRUSH_VERSION}.version"
+		task :install => DRUSH_INSTALLED
 		task :clean do
 			if File.exist? 'bin/drush'
 				rm_r 'bin/drush'
@@ -186,7 +195,7 @@ $update_free_access = FALSE;
 		desc "Load the last local snapshot"
 		task :load => [:_load, "^enable"]
 		
-		task :_load do
+		task :_load => DRUSH_INSTALLED do
 			@db.load dump
 			@drupal.updatedb
 			@drupal.clear_cache
@@ -201,37 +210,37 @@ $update_free_access = FALSE;
 		task :install => [:upgrade]
 	end
 	
-	task :enable do
+	task :enable  => DRUSH_INSTALLED do
 		@profile['drupal'].fetch('modules',[]).each do |m|
 			@drupal.enable m
 		end
 	end
 	
 	desc "Launch cron task"
-	task :cron do
+	task :cron => DRUSH_INSTALLED do
 		@drupal.cron
 	end
 
 	desc "Clear cache"
-	task :clear do
+	task :clear => DRUSH_INSTALLED do
 		@drupal.clear_cache
 	end	
 	
 	desc "Build Drupal's settings"
-	task :conf => 'core:conf'
+	task :conf => 'drupal:core:conf'
 
 	desc "Install Drupal"
 	task :install => ['drush:install', 'core:install', 'db:install']
 	
 	desc "Initialize"
 	task :init => ['drush:install','db:user', 'core:init'] do
-		p "Open http://#{@profile['web']['host']}:#{@profile['web']['port']}/#{@profile['drupal']['appli']}/install.php"
+		puts "Open http://#{@profile['web']['host']}:#{@profile['web']['port']}/#{@profile['drupal']['appli']}/install.php"
 	end
 	
 	desc "Get the newest Drupal with the newest snapshot"
 	task :lastOne => [:clean, :install, 'db:upgrade']
 	
-	task :update => ['drush:install', 'core:install']
+	task :update => ['core:install']
 
 	desc "Cleanup"
 	task :clean => ['core:clean', 'drush:clean']
@@ -247,3 +256,6 @@ $update_free_access = FALSE;
 		@drupal.test
 	end
 end
+
+desc "Update"
+task :update => "drupal:update"
