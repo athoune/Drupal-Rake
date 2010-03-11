@@ -65,6 +65,7 @@ module Subversion
 		end
 	end
 
+	#update or checkout
 	def Subversion.get(url, target)
 		if File.exist? target
 			Subversion.update target
