@@ -19,7 +19,7 @@ class Db
 			#sh %{ #{mysql} "TRUNCATE #{@dbname}.#{table}"; true}
 		end
 		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables  --add-locks --ignore-table=#{@dbname}.cache --ignore-table=#{@dbname}.sessions --ignore-table=#{@dbname}.watchdog --password='#{@password}' --quick --default-character-set=utf8  --extended-insert --add-drop-table  #{@dbname} --result-file=dump/#{name}.sql"
-		sh "bzip2 dump/#{name}.sql"
+		sh "bzip2 --force  dump/#{name}.sql"
 	end
 	
 	def load(name)
