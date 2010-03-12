@@ -14,17 +14,22 @@ class Db
 	
 	def dump(name)
 		sh "mkdir -p dump"
-		sh %{  #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute "TRUNCATE #{@dbname}.sessions"; true}
-		sh %{  #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute "TRUNCATE #{@dbname}.watchdog"; true}
-		sh %{  #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute "TRUNCATE #{@dbname}.cache"; true}
-		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables --compact --password='#{@password}' --quick --add-drop-table  #{@dbname} | bzip2 -c > dump/#{name}.sql.bz2"
+		mysql = %{ #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute }
+		%w{sessions watchdog cache}.each do |table|
+			#sh %{ #{mysql} "TRUNCATE #{@dbname}.#{table}"; true}
+		end
+		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables  --add-locks --ignore-table=#{@dbname}.cache --ignore-table=#{@dbname}.sessions --ignore-table=#{@dbname}.watchdog --password='#{@password}' --quick --default-character-set=utf8  --extended-insert --add-drop-table  #{@dbname} --result-file=dump/#{name}.sql"
+		sh "bzip2 dump/#{name}.sql"
 	end
 	
 	def load(name)
 		if not File.exist? "dump/#{name}.sql.bz2"
-			raise StandardError, "This dimp doesn't exist : dump/#{name}.sql.bz2"
+			raise StandardError, "This dump doesn't exist : dump/#{name}.sql.bz2"
 		end
-		sh "bzcat dump/#{name}.sql.bz2 | #{@bin}mysql -h #{@uri.host} -u #{@login} --password='#{@password}' #{@dbname}"
+		sh "bunzip2 --keep --force dump/#{name}.sql.bz2"
+		sh %{ #{@bin}mysql -h #{@uri.host} -u #{@login} --password='#{@password}' #{@dbname} --batch --execute="SOURCE #{`pwd`.strip}/dump/#{name}.sql" }
+		sh "rm dump/#{name}.sql"
+		#sh "bzcat dump/#{name}.sql.bz2 | #{@bin}mysql -h #{@uri.host} -u #{@login} --password='#{@password}' #{@dbname}"
 	end
 	
 	def create_user
