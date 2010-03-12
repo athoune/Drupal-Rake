@@ -58,10 +58,10 @@ module Subversion
 
 	def Subversion.update(target)
 		puts "[SVN] Update de #{target}"
-		if File.file? target
-			sh "svn update #{target}"
-		else
+		if File::directory? target
 			sh "cd #{target} && svn update"
+		else
+			sh "svn update #{target}"
 		end
 	end
 
