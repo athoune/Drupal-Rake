@@ -39,12 +39,13 @@ namespace :drupal do
 			Dir.chdir '/tmp' do
 				folder = `tar -tf #{tarball}`.split('/')[0]
 				sh "rm -r #{folder}" if File.exist? folder
-				sh "tar -xvzf #{tarball}"
+				sh "tar -xzf #{tarball}"
 				sh "mv /tmp/#{folder}/* #{noTrailingSpace(@profile['drupal']['path'])}"
 				sh "mv /tmp/#{folder}/.htaccess #{noTrailingSpace(@profile['drupal']['path'])}"
 				sh "rm -r #{folder}"
 			end
 			sh "rm -r #{@profile['drupal']['path']}sites/*"
+			sh "mkdir -p #{@profile['drupal']['path']}sites/default/files"
 		end
 		
 		task :clean do
@@ -82,10 +83,8 @@ namespace :drupal do
 				puts "[Info] profile.yml is modified"
 			end
 		end
-		task :install => [:patch, :conf, :sites, "drupal:cron"] do
-			@drupal.updatedb
-			@drupal.clear_cache
-		end
+		
+		task :install => [:patch, :conf, :sites] #"drupal:db:install"
 		
 		task :upgradeCore do
 			backup = "/tmp/drupal-backup/#{Time.now.to_i}/"
@@ -98,7 +97,11 @@ namespace :drupal do
 			@drupal.updatedb
 		end
 
-		task :conf => @profile['drupal']['path'] do
+		file "#{@profile['drupal']['path']}sites/default/settings.php" do
+			Rake::Task['drupal:conf'].invoke
+		end
+
+		task :conf => DRUPAL_INSTALLED do
 			mkdir_p "#{@profile['drupal']['path']}sites/default"
 			settings = "#{@profile['drupal']['path']}sites/default/settings.php"
 			if File.exist?(settings) and not File.writable?(settings)
@@ -157,12 +160,12 @@ $update_free_access = FALSE;
 	end
 	
 	namespace :drush do
-		file DRUSH_INSTALLED => "drupal:conf" do
+		file DRUSH_INSTALLED => "#{@profile['drupal']['path']}sites/default/settings.php" do
 			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-#{DRUSH_VERSION}.tar.gz"
 			Rake::Task['drupal:drush:clean'].invoke
 			mkdir_p 'bin'
 			Dir.chdir 'bin' do
-				sh "tar -xvzf #{drush}"
+				sh "tar -xzf #{drush}"
 			end
 			sh "chmod +x bin/drush/drush"
 			sh "touch bin/drush/#{DRUSH_VERSION}.version"
@@ -181,7 +184,6 @@ $update_free_access = FALSE;
 
 		desc "Make a db snapshot"
 		task :dump do
-			#@drupal.drush 'cache clear'
 			@db.dump dump
 		end
 		
@@ -193,14 +195,16 @@ $update_free_access = FALSE;
 		task :upgrade => [:_upgrade, :load]
 		
 		desc "Load the last local snapshot"
-		task :load => [:_load, "^enable"]
-		
-		task :_load => DRUSH_INSTALLED do
-			@db.load dump
+		task :load => [DRUSH_INSTALLED, "drupal:core:conf", :just_load, "drupal:core:sites"] do
 			@drupal.updatedb
-			@drupal.clear_cache
 		end
-		
+
+		task :just_load do
+			@db.load dump
+			@drupal.clear_cache
+			enableModules
+		end
+
 		desc "create db user"
 		task :user do
 			@db.create_user 
@@ -210,10 +214,14 @@ $update_free_access = FALSE;
 		task :install => [:upgrade]
 	end
 	
-	task :enable  => DRUSH_INSTALLED do
+	def enableModules()
 		@profile['drupal'].fetch('modules',[]).each do |m|
 			@drupal.enable m
 		end
+	end
+
+	task :enable  => DRUSH_INSTALLED do
+		enableModules
 	end
 	
 	task :variables => DRUSH_INSTALLED do
@@ -242,7 +250,7 @@ $update_free_access = FALSE;
 	task :conf => 'drupal:core:conf'
 
 	desc "Install Drupal"
-	task :install => ['db:install', :update]
+	task :install => ['core:sites', 'db:install', :update]
 	
 	desc "Initialize"
 	task :init => ['drush:install','db:user', 'core:init'] do
