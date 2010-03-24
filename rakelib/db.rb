@@ -16,9 +16,9 @@ class Db
 		sh "mkdir -p dump"
 		mysql = %{ #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute }
 		%w{sessions watchdog cache}.each do |table|
-			#sh %{ #{mysql} "TRUNCATE #{@dbname}.#{table}"; true}
+			sh %{ #{mysql} "TRUNCATE #{@dbname}.#{table}"; true}
 		end
-		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables  --add-locks --ignore-table=#{@dbname}.cache --ignore-table=#{@dbname}.sessions --ignore-table=#{@dbname}.watchdog --password='#{@password}' --quick --default-character-set=utf8  --extended-insert --add-drop-table  #{@dbname} --result-file=dump/#{name}.sql"
+		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables  --add-locks --password='#{@password}' --quick --default-character-set=utf8  --extended-insert --add-drop-table  #{@dbname} --result-file=dump/#{name}.sql"
 		sh "bzip2 --force  dump/#{name}.sql"
 	end
 	
