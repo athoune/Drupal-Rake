@@ -301,3 +301,9 @@ end
 
 desc "Update"
 task :update => "drupal:update"
+
+desc "Install"
+task :install => ["drupal:install", "drush:install"]
+
+desc "Erase and clean"
+task :clean => 'drupal:clean'
