@@ -181,6 +181,8 @@ $update_free_access = FALSE;
 	namespace :defaultfiles do
 		dump = @profile.fetch('dump', 'dump')
 		cache = %w{css ctools js imagecache .htacess}
+
+		desc "Make a default/files snapshot"
 		task :dump do
 			mkdir_p "dump/#{dump}-default-files"
 			excludes = ''
@@ -188,6 +190,14 @@ $update_free_access = FALSE;
 				excludes += %{--exclude '#{exclude}' }
 			end
 			sh %{rsync -av #{excludes} #{@profile['drupal']['path']}sites/default/files/* dump/#{dump}-default-files/}
+			puts "don't forget to commit dump/#{dump}-default-files/"
+		end
+		task :update do
+			Subversion.update "dump/#{dump}-default-files/"
+		end
+		desc "Deploy dumped default/files"
+		task :deploy => :update do
+			sh %{rsync -av dump/#{dump}-default-files/* #{@profile['drupal']['path']}sites/default/files/}
 		end
 	end
 	
