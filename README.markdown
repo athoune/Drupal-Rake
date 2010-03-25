@@ -64,13 +64,8 @@ The name of the dump
 Rakefile
 ========
 
-Put all this stuff inside your project **rakelib**, and build your own Rakefile, here is an example :
+Build an empty Rakefile :
 
-	desc "Update"
-	task :update => 'drupal:install'
-	
-	desc "The last one"
-	task :lastOne => 'drupal:lastOne'
-	
-	desc "Big cleanup"
-	task :clean => 'drupal:clean'
+	touch Rakefile
+
+It's up to you to add mores tasks, rake, just like ruby loves monkey patching.
