@@ -178,6 +178,19 @@ $update_free_access = FALSE;
 		end
 	end
 	
+	namespace :defaultfiles do
+		dump = @profile.fetch('dump', 'dump')
+		cache = %w{css ctools js imagecache .htacess}
+		task :dump do
+			mkdir_p "dump/#{dump}-default-files"
+			excludes = ''
+			cache.each do |exclude|
+				excludes += %{--exclude '#{exclude}' }
+			end
+			sh %{rsync -av #{excludes} #{@profile['drupal']['path']}sites/default/files/* dump/#{dump}-default-files/}
+		end
+	end
+	
 	namespace :db do
 		dump = @profile.fetch('dump', 'dump')
 
