@@ -16,7 +16,7 @@ end
 
 DRUSH_VERSION = "All-versions-3.0-beta1"
 DRUPAL_INSTALLED = "#{@profile['drupal']['path']}/index.php"
-DRUSH_INSTALLED = "bin/drush/#{DRUSH_VERSION}.version"
+DRUSH_INSTALLED = "#{`pwd`.strip}/bin/drush/#{DRUSH_VERSION}.version"
 
 namespace :drupal do
 	namespace :core do
@@ -160,18 +160,17 @@ $update_free_access = FALSE;
 	end
 	
 	namespace :drush do
-		file DRUSH_INSTALLED => "#{@profile['drupal']['path']}sites/default/settings.php" do
+		#=> "#{@profile['drupal']['path']}sites/default/settings.php"
+		file DRUSH_INSTALLED  do
 			drush = @fetcher.fetch "http://ftp.drupal.org/files/projects/drush-#{DRUSH_VERSION}.tar.gz"
 			Rake::Task['drupal:drush:clean'].invoke
 			mkdir_p 'bin'
-			Dir.chdir 'bin' do
-				sh "tar -xzf #{drush}"
-			end
+			sh "cd bin && tar -xzf #{drush}"
 			sh "chmod +x bin/drush/drush"
-			sh "touch bin/drush/#{DRUSH_VERSION}.version"
+			sh "touch #{DRUSH_INSTALLED}"
 		end
 		
-		task :install => DRUSH_INSTALLED
+		task :install => [DRUSH_INSTALLED, "#{@profile['drupal']['path']}sites/default/settings.php"]
 		task :clean do
 			if File.exist? 'bin/drush'
 				rm_r 'bin/drush'
