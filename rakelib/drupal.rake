@@ -197,7 +197,7 @@ $update_free_access = FALSE;
 		end
 		desc "Deploy dumped default/files"
 		task :deploy => :update do
-			sh %{rsync -av dump/#{dump}-default-files/* #{@profile['drupal']['path']}sites/default/files/}
+			sh %{rsync -av --exclude .svn dump/#{dump}-default-files/* #{@profile['drupal']['path']}sites/default/files/}
 		end
 	end
 	
