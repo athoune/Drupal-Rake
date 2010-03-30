@@ -10,11 +10,11 @@ class Db
 		end
 		@login, @password = @uri.userinfo.split(':')
 		@dbname = @uri.path[1,@uri.path.length]
+		@mysql = %{ #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute }
 	end
 	
 	def dump(name)
 		sh "mkdir -p dump"
-		mysql = %{ #{@bin}mysql -u #{@login} --password='#{@password}' -h #{@uri.host} --batch --execute }
 		%w{sessions watchdog cache}.each do |table|
 			sh %{ #{mysql} "TRUNCATE #{@dbname}.#{table}"; true}
 		end
@@ -34,5 +34,9 @@ class Db
 	
 	def create_user
 		sh %{ #{@bin}mysql -u root -h #{@uri.host} -p --batch --execute "CREATE DATABASE IF NOT EXISTS #{@dbname}; REPLACE INTO mysql.user (Host, User, Password, Select_priv, Insert_priv, Update_priv, Delete_priv, Create_priv, Drop_priv, Reload_priv, References_priv, Index_priv, Alter_priv) VALUES('localhost','#{@login}',PASSWORD('#{@password}'), 'Y','Y','Y','Y','Y','Y','Y','Y','Y','Y'); FLUSH PRIVILEGES; GRANT ALL PRIVILEGES ON #{@dbname}.* TO '#{@login}'@'localhost'; FLUSH PRIVILEGES;" }
+	end
+	
+	def tables
+		return `#{@mysql} "SHOW TABLES;" #{@dbname}`.split "\n"
 	end
 end
