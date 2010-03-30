@@ -234,6 +234,11 @@ $update_free_access = FALSE;
 		
 		desc "database setup and first import"
 		task :install => [:upgrade]
+		
+		desc "convert database to innodb"
+		task :innodb do
+			@db.convert_to_innodb
+		end
 	end
 	
 	def enableModules()

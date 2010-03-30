@@ -37,6 +37,12 @@ class Db
 	end
 	
 	def tables
-		return `#{@mysql} "SHOW TABLES;" #{@dbname}`.split "\n"
+		return `#{@mysql} "SHOW TABLES;" #{@dbname}`.split("\n").slice 1..-1
+	end
+	
+	def convert_to_innodb
+		self.tables.each do |table|
+			sh %{ #{@mysql} "ALTER TABLE #{table} ENGINE = InnoDB;" #{@dbname}}
+		end
 	end
 end
