@@ -16,7 +16,7 @@ class Db
 	def dump(name)
 		sh "mkdir -p dump"
 		%w{sessions watchdog cache}.each do |table|
-			sh %{ #{mysql} "TRUNCATE #{@dbname}.#{table}"; true}
+			sh %{ #{@mysql} "TRUNCATE #{@dbname}.#{table}"; true}
 		end
 		sh "#{@bin}mysqldump -u #{@login} -h #{@uri.host} --lock-tables  --add-locks --password='#{@password}' --quick --default-character-set=utf8  --extended-insert --add-drop-table  #{@dbname} --result-file=dump/#{name}.sql"
 		sh "bzip2 --force  dump/#{name}.sql"
