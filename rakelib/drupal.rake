@@ -6,7 +6,7 @@ require 'rakelib/subversion'
 require 'rakelib/profile'
 
 @profile ||= Profile.profile
-@drupal ||= Drupal.new @profile['server'], @profile['drupal']['path']
+@drupal ||= Drupal.new @profile['server'], @profile['drupal']['path'], @profile['drupal'].fetch('user', 1)
 if @profile.key? 'server'
 	server = @profile['server']
 else
@@ -14,7 +14,7 @@ else
 end
 @db ||= Db.new server, @profile['drupal']['db']
 
-DRUSH_VERSION = "All-versions-3.0-beta1"
+DRUSH_VERSION = "All-versions-3.0-rc2"
 DRUPAL_INSTALLED = "#{@profile['drupal']['path']}/index.php"
 DRUSH_INSTALLED = "#{`pwd`.strip}/bin/drush/#{DRUSH_VERSION}.version"
 
