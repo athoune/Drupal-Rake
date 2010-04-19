@@ -1,3 +1,5 @@
+require 'uri'
+
 class Db
 	attr :uri
 	
