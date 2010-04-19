@@ -39,7 +39,7 @@ class Db
 	end
 	
 	def tables
-		return `#{@mysql} "SHOW TABLES;" #{@dbname}`.split("\n").slice 1..-1
+		return `#{@mysql} "SHOW TABLES;" #{@dbname}`.split("\n").slice(1..-1)
 	end
 	
 	def convert_to_innodb

@@ -1,7 +1,7 @@
 class Drupal
 	attr :version
 
-	def initialize(server, path)
+	def initialize(server, path, user=1)
 		@php = Php.new server
 		@path = path
 		if File.exist? "#{path}/modules/system/system.module"
@@ -14,10 +14,11 @@ class Drupal
 		# --user 1
 		# --root=.
 		if `uname`.strip == 'Darwin'
-			@drush = "#{@php.php} #{`pwd`.strip}/bin/drush/drush.php "
+			@drush = "./bin/drush/drush --php=#{@php.php}"
 		else
 			@drush = "#{`pwd`.strip}/bin/drush/drush"
 		end
+		@user = user
 	end
 
 	def major
@@ -69,7 +70,7 @@ class Drupal
 	def drush(command, root=false)
 		if File.exist? @path
 			su = root ? "sudo":""
-			sh "cd #{@path} && #{su} #{@drush} -u 1 #{command}"
+			sh "#{su} #{@drush} --root=#{@path} --user=#{@user} #{command}"
 		end
 	end
 
