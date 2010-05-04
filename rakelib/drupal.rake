@@ -14,7 +14,7 @@ else
 end
 @db ||= Db.new server, @profile['drupal']['db']
 
-DRUSH_VERSION = "All-versions-3.0-rc2"
+DRUSH_VERSION = "All-versions-3.0"
 DRUPAL_INSTALLED = "#{@profile['drupal']['path']}/index.php"
 DRUSH_INSTALLED = "#{`pwd`.strip}/bin/drush/#{DRUSH_VERSION}.version"
 
