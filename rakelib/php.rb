@@ -4,7 +4,7 @@ class Php
 	def initialize(server)
 		@server = server
 		@bin  = case server
-			when "mamp": "/Applications/MAMP/bin/php5/bin/"
+			when "mamp": "/Applications/MAMP/bin/php5.2/bin/"
 			when "macport": "/opt/local/bin/"
 			else "/usr/bin/"
 		end
