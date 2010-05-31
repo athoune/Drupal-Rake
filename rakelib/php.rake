@@ -1,5 +1,6 @@
 namespace :php do
 	PHP_VERSION = '5.3.2'
+	FPM_VERSION = 'SVN'
 	namespace :fpm do
 		file "/tmp/php-#{PHP_VERSION}.tar.bz2" do
 			sh "cd /tmp && curl -O http://be.php.net/distributions/php-#{PHP_VERSION}.tar.bz2"
@@ -18,7 +19,20 @@ namespace :php do
 			end
 		end
 		task :patch => "/tmp/php-#{PHP_VERSION}/FPM_PATCH"
-		
+		file "/tmp/php-#{PHP_VERSION}/#{PHP_VERSION}-#{FPM_VERSION}.install" do	
+			Rake::Task['php:fpm:patch'].invoke
+			Rake::Task['php:fpm:libevent:install'].invoke
+			Dir.chdir "/tmp/php-#{PHP_VERSION}" do
+				sh "./configure --enable-fpm --with-libevent=/opt/libevent --prefix=/opt/php-fpm --with-curl --enable-mbstring --enable-sockets -enable-zip --with-pcre-regex --with-mysqli --with-gd --with-mcrypt --with-fpm-group=nogroup --with-gettext --enable-mbstring --enable-zlib --with-zlib --enable-gd-native-ttf --with-jpeg-dir=/usr/lib/"
+				sh "make"
+				sh "sudo make install"
+				sh "touch #{PHP_VERSION}-#{FPM_VERSION}.install"
+			end
+		end
+		task :install => "/tmp/php-#{PHP_VERSION}/#{PHP_VERSION}-#{FPM_VERSION}.install"
+		task :apc => :install do
+			sh "echo 'no' | sudo /opt/php-fpm/bin/pecl install apc"
+		end
 		namespace :libevent do
 			LIBEVENT_VERSION = '1.4.13-stable'
 			file "/tmp/libevent-#{LIBEVENT_VERSION}.tar.gz" do
