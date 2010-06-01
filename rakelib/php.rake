@@ -1,6 +1,8 @@
 namespace :php do
 	PHP_VERSION = '5.3.2'
 	FPM_VERSION = 'SVN'
+	require 'rakelib/php.rb'
+	@php ||= Php.new @profile['server']
 	namespace :fpm do
 		file "/tmp/php-#{PHP_VERSION}.tar.bz2" do
 			sh "cd /tmp && curl -O http://be.php.net/distributions/php-#{PHP_VERSION}.tar.bz2"
@@ -31,7 +33,15 @@ namespace :php do
 		end
 		task :install => "/tmp/php-#{PHP_VERSION}/#{PHP_VERSION}-#{FPM_VERSION}.install"
 		task :apc => :install do
-			sh "echo 'no' | sudo /opt/php-fpm/bin/pecl install apc"
+			if not @php.pecl? 'APC'
+				sh "echo 'no' | sudo /opt/php-fpm/bin/pecl install apc-3.1.3p1"
+			end
+		end
+		task :uploadprogress => :install do
+			sh "sudo /opt/php-fpm/bin/pecl install uploadprogress"
+		end
+		task :memcache => :install do
+			sh %{echo "yes" | sudo /opt/php-fpm/bin/pecl install memcache}
 		end
 		namespace :libevent do
 			LIBEVENT_VERSION = '1.4.13-stable'
