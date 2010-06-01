@@ -33,16 +33,16 @@ namespace :php do
 		end
 		task :install => "/tmp/php-#{PHP_VERSION}/#{PHP_VERSION}-#{FPM_VERSION}.install"
 		task :apc => :install do
-			if not @php.pecl? 'APC'
-				sh "echo 'no' | sudo /opt/php-fpm/bin/pecl install apc-3.1.3p1"
-			end
+			@php.pecl_install 'APC-3.1.3p1', 'no'
 		end
 		task :uploadprogress => :install do
-			sh "sudo /opt/php-fpm/bin/pecl install uploadprogress"
+			@php.pecl_install 'uploadprogress'
 		end
 		task :memcache => :install do
-			sh %{echo "yes" | sudo /opt/php-fpm/bin/pecl install memcache}
+			@php.pecl_install 'memcache', 'yes'
 		end
+		task :extensions => [:apc, :uploadprogress, :memcache]
+
 		namespace :libevent do
 			LIBEVENT_VERSION = '1.4.13-stable'
 			file "/tmp/libevent-#{LIBEVENT_VERSION}.tar.gz" do

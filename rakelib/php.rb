@@ -21,4 +21,14 @@ class Php
 		end
 		return false
 	end
+	def pecl_install(packet, answer=nil)
+		if not self.pecl? packet.split('-')[0]
+			if answer != nil
+				cmd = %{echo "#{answer}" | }
+			else
+				cmd = ''
+			end
+			sh %{#{cmd} sudo #{@pecl} install #{packet}}
+		end
+	end
 end
