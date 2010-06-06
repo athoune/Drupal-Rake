@@ -13,11 +13,7 @@ class Drupal
 		end
 		# --user 1
 		# --root=.
-		if `uname`.strip == 'Darwin'
-			@drush = "./bin/drush/drush --php=#{@php.php}"
-		else
-			@drush = "#{`pwd`.strip}/bin/drush/drush"
-		end
+		@drush = "#{@php.php} ./bin/drush/drush.php "
 		@user = user
 	end
 
