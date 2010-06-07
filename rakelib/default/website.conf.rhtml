@@ -1,0 +1,95 @@
+server.modules += (
+		"mod_redirect",
+		"mod_access",
+		"mod_status",
+		"mod_fastcgi",
+		"mod_proxy",
+		"mod_expire",
+		"mod_accesslog",
+		"mod_magnet",
+		"mod_auth",
+		"mod_setenv")
+
+#debug.log-request-handling = "enable"
+#debug.log-file-not-found   = "enable"
+server.stat-cache-engine = "fam"
+
+$HTTP["host"] == "<%=@profile['web']['host']%>" {
+	url.redirect = ("^/(.*)" => "http://www.<%=@profile['web']['host']%>/$1")
+	url.redirect-code = 301
+}
+
+# existe juste dans light 1.5
+#$PHYSICAL["path"] !~ "^<%= @profile['drupal']['path']%>(sites|themes)" {
+#		access.deny-all = "enable"
+#}
+
+$HTTP["host"] == "<%= @profile['web']['host']%>" {
+	#mot de passe avant la mise en prod
+#		auth.backend               = "htdigest"
+#		auth.backend.htdigest.userfile = "/data/user.htdigest"
+#		auth.require = ( "" =>
+#			(
+#			"method" => "digest",
+#			"realm" => "beuha",
+#			"require" => "valid-user"
+#			)
+#		)
+		
+	<%if @profile['web']['chrome']%>
+	#Chrome frame
+		$HTTP["useragent"] !~ "MSIE 8\.0" {
+			setenv.add-response-header = (
+			"X-UA-Compatible" => "chrome=1"
+			)
+		}
+	<%end%>
+	#bannissements de base
+		url.access-deny = ( "~", ".inc", ".txt", ".module", ".install")
+		$HTTP["url"] =~ "^/(cron|update|xmlrpc)\.php$" {
+			url.access-deny = ( "" )
+		}
+
+		server.document-root = "<%= @profile['drupal']['path']%>"
+
+		$SERVER["socket"] == ":443" {
+			ssl.engine = "enable" 
+			ssl.pemfile = "/etc/ssl/dummy.pem" 
+		#	server.document-root = "<%= @profile['drupal']['path']%>"
+		}
+
+		$SERVER["socket"] == ":80" {
+	#redirection vers la version SSL
+			<% @profile['web']['ssl'].each do |start|
+				if @profile['drupal']['appli'] != ''
+					start = '/' + start
+				end
+			%>
+			$HTTP["url"] =~ "^/<%= @profile['drupal']['appli']%><%= start%>($|/.*)" {
+				$HTTP["host"] =~ "^(.*)$" {
+					url.redirect = ( "^/(.*)$" => "https://%1/$1" )
+				}
+			}
+			<% end %>
+		}
+		<%if(@profile['web']['expire'])%>
+		$HTTP["url"] =~ "^/(sites|misc)/" {
+			expire.url = ( "" => "access plus 1 months" )
+		}
+		<%end%>
+		fastcgi.server = ( ".php" => (
+			<% @profile['php']['server'].each do |server| %>
+			( "host" => "<%= server%>",
+				"port" => <%= @profile['php']['port'] %>,
+				"allow-x-send-file" => "enable"
+			),
+			<% end %>
+		))
+
+		$HTTP["url"] =~ "^/<%= @profile['drupal']['appli']%>" {
+			# we only need index.php here.
+			index-file.names = ( "index.php" )
+			# for clean urls
+			magnet.attract-physical-path-to = ( "<%= "#{@etc}/drupal.lua" %>" )
+		}
+}
