@@ -8,17 +8,7 @@ All your work is managed by a versionning tool, Subversion.
 Install
 =======
 
-The rubygem of Ubuntu 8.04 is rotten. Fetch the last one : http://rubygems.org/pages/download
-
-	tar -xvzf rubygems-1.3.6.tgz
-	cd rubygems-1.3.6
-	sudo ruby setup.rb
-	sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
-	sudo gem update –system
-
-rake is rotten too :
-
-	sudo gem install rake
+Ruby tools needs Ubuntu >= 9.04, with an older version, you have to do handmade install
 
 The rubygems installed in Snow Leopard is just fine.
 
@@ -51,7 +41,7 @@ You can handle classical drupal (aka vanilla), pressflow or even acquia
 
 	drupal:
 	  flavor: 'vanilla'
-	  version: 6.14
+	  version: 6.17
 	  path:    '/Applications/MAMP/htdocs/drupal_test/'
 	  db:      'mysqli://druser:drupassword@localhost:8889/drupaldb_test'
 
