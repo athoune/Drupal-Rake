@@ -90,6 +90,6 @@ $HTTP["host"] == "<%= @profile['web']['host']%>" {
 			# we only need index.php here.
 			index-file.names = ( "index.php" )
 			# for clean urls
-			magnet.attract-physical-path-to = ( "<%= "#{@etc}/drupal.lua" %>" )
+			magnet.attract-physical-path-to = ( "/etc/lighttpd/conf-enabled/drupal-<%=@profile['name']%>.lua" )
 		}
 }
