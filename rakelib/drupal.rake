@@ -312,3 +312,5 @@ task :install => ["drupal:install", "drupal:drush:install"]
 
 desc "Erase and clean"
 task :clean => 'drupal:clean'
+
+task :conf => 'drupal:conf'
