@@ -14,10 +14,12 @@ server.modules += (
 #debug.log-file-not-found   = "enable"
 server.stat-cache-engine = "fam"
 
+<% if @profile['web']['add_www'] %>
 $HTTP["host"] == "<%=@profile['web']['host']%>" {
 	url.redirect = ("^/(.*)" => "http://www.<%=@profile['web']['host']%>/$1")
 	url.redirect-code = 301
 }
+<% end %>
 
 # existe juste dans light 1.5
 #$PHYSICAL["path"] !~ "^<%= @profile['drupal']['path']%>(sites|themes)" {
@@ -52,15 +54,17 @@ $HTTP["host"] == "<%= @profile['web']['host']%>" {
 
 		server.document-root = "<%= @profile['drupal']['path']%>"
 
+<% if @profile['web']['ssl'] %>
 		$SERVER["socket"] == ":443" {
 			ssl.engine = "enable" 
-			ssl.pemfile = "/etc/ssl/dummy.pem" 
+			ssl.pemfile = "<%=@profile['web']['certificat']%>" 
 		#	server.document-root = "<%= @profile['drupal']['path']%>"
 		}
+<% end %>
 
-		$SERVER["socket"] == ":80" {
-	#redirection vers la version SSL
-			<% @profile['web']['ssl'].each do |start|
+	$SERVER["socket"] == ":80" {
+		<% if @profile['web']['ssl'] %>
+			<% @profile['web']['only_ssl'].each do |start|
 				if @profile['drupal']['appli'] != ''
 					start = '/' + start
 				end
@@ -70,6 +74,7 @@ $HTTP["host"] == "<%= @profile['web']['host']%>" {
 					url.redirect = ( "^/(.*)$" => "https://%1/$1" )
 				}
 			}
+			<% end %>
 			<% end %>
 		}
 		<%if(@profile['web']['expire'])%>
