@@ -38,7 +38,7 @@ $HTTP["host"] == "<%= @profile['web']['host']%>" {
 #			)
 #		)
 		
-	<%if @profile['web']['chrome']%>
+	<%if @profile['web']['chrome_frame']%>
 	#Chrome frame
 		$HTTP["useragent"] !~ "MSIE 8\.0" {
 			setenv.add-response-header = (
