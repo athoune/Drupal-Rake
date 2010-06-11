@@ -15,7 +15,7 @@ namespace :php do
 		file "/tmp/php-#{PHP_VERSION}/FPM_PATCH" do
 			Rake::Task["/tmp/php-#{PHP_VERSION}"].invoke
 			Dir.chdir "/tmp/php-#{PHP_VERSION}" do
-				sh "svn co http://svn.php.net/repository/php/php-src/trunk/sapi/fpm sapi/fpm"
+				sh "svn co http://svn.php.net/repository/php/php-src/branches/PHP_5_3/sapi/fpm sapi/fpm"
 				sh "touch FPM_PATCH"
 				sh "./buildconf --force"
 			end
