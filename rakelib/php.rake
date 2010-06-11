@@ -31,6 +31,10 @@ namespace :php do
 				sh "touch #{PHP_VERSION}-#{FPM_VERSION}.install"
 			end
 		end
+		task :rcd => :patch do
+			sh "sudo cp /tmp/php-#{PHP_VERSION}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm"
+			sh "sudo update-rc.d php-fpm defaults"
+		end
 		task :install => "/tmp/php-#{PHP_VERSION}/#{PHP_VERSION}-#{FPM_VERSION}.install"
 		task :apc => :install do
 			@php.pecl_install 'APC-3.1.3p1', 'no'
@@ -62,5 +66,16 @@ namespace :php do
 				
 			end
 		end
+	end
+
+	file 'template/php-fpm.conf.rhtml' do
+		cp 'rakelib/default/php-fpm.conf.rhtml', 'template/php-fpm.conf.rhtml'
+	end
+
+	task :conf => ['template/php-fpm.conf.rhtml'] do
+		generate 'template/php-fpm.conf.rhtml', 'etc/php-fpm.conf'
+	end
+	task :linuxConf => [:conf, 'php:fpm:rcd'] do
+		sh "sudo cp etc/php-fpm.conf /opt/php-fpm/etc/php-fpm.conf"
 	end
 end
