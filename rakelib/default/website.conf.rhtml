@@ -83,9 +83,9 @@ $HTTP["host"] == "<%= @profile['web']['host']%>" {
 		}
 		<%end%>
 		fastcgi.server = ( ".php" => (
-			<% @profile['php']['server'].each do |server| %>
+			<% @profile['web']['php']['server'].each do |server| %>
 			( "host" => "<%= server%>",
-				"port" => <%= @profile['php']['port'] %>,
+				"port" => <%= @profile['web']['php']['port'] %>,
 				"allow-x-send-file" => "enable"
 			),
 			<% end %>
