@@ -274,7 +274,9 @@ $update_free_access = FALSE;
 	end	
 	
 	desc "Build Drupal's settings"
-	task :conf => 'drupal:core:conf'
+	task :conf => 'drupal:core:conf' do
+		@drupal.vset 'file_directory_temp', '/tmp'
+	end
 
 	desc "Install Drupal"
 	task :install => ['core:sites', 'db:install', :update]

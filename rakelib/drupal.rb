@@ -38,7 +38,7 @@ class Drupal
 	end
 	
 	def update
-		drush "update"
+		drush "pm-update"
 	end
 	
 	def dl(m)
